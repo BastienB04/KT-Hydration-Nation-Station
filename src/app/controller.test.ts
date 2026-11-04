@@ -1,0 +1,240 @@
+import { describe, expect, it } from "vitest";
+import { createDefaultData, type PersistedData } from "../core/schema";
+import { createAppStore } from "../state/store";
+import type { RootState } from "../state/reducer";
+import { createFakePlatform } from "../test/fakePlatform";
+import { createController } from "./controller";
+
+// Instants on 2026-11-04 (Wed, GMT so local == UTC), inside 08:00-22:00.
+function at(h: number, m = 0): number {
+  return new Date(2026, 10, 4, h, m).getTime();
+}
+function iso(h: number, m = 0): string {
+  return new Date(2026, 10, 4, h, m).toISOString();
+}
+
+function buildStore(mutate?: (d: PersistedData) => void) {
+  const data = createDefaultData();
+  data.settings.setupDone = true;
+  mutate?.(data);
+  const root: RootState = { data, ui: { saveError: null, notificationsBlocked: false } };
+  return createAppStore(root);
+}
+
+/** Let pending async work (evaluate -> notifier.send, save queue) settle. */
+function settle(): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, 5));
+}
+
+describe("controller reminders", () => {
+  it("does not fire before setup is done", async () => {
+    const h = createFakePlatform();
+    const store = buildStore((d) => {
+      d.settings.setupDone = false;
+    });
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    h.emitTick();
+    await settle();
+    expect(h.sent).toHaveLength(0);
+    c.dispose();
+  });
+
+  it("fires exactly one notification at the due time, with sound on", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    let clock = at(8, 30); // not due yet
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.sent).toHaveLength(0);
+
+    clock = at(9); // now due (anchor = 08:00 start, interval 60)
+    h.emitTick();
+    await settle();
+
+    expect(h.sent).toHaveLength(1);
+    expect(h.sent[0].title).toBe("Ribbit says: time for a sip 🐸");
+    expect(h.sent[0].body.length).toBeGreaterThan(0);
+    expect(h.ribbitCount()).toBe(1);
+    c.dispose();
+  });
+
+  it("plays no ribbit when sound is off", async () => {
+    const h = createFakePlatform();
+    const store = buildStore((d) => {
+      d.settings.soundEnabled = false;
+    });
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    expect(h.ribbitCount()).toBe(0);
+    c.dispose();
+  });
+
+  it("fires once for a tick and a wake in the same turn", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    let clock = at(8, 30);
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    clock = at(9);
+    h.emitTick();
+    h.emitWake();
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    c.dispose();
+  });
+
+  it("fires once after sleeping through several intervals", async () => {
+    const h = createFakePlatform();
+    const store = buildStore((d) => {
+      d.state.lastReminderAt = iso(9);
+    });
+    const c = createController({ store, platform: h.platform, now: () => at(12, 10), applyAutostartOnSetup: false });
+    await c.start(); // one catch-up fire
+    expect(h.sent).toHaveLength(1);
+    h.emitTick();
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    c.dispose();
+  });
+});
+
+describe("controller tray actions", () => {
+  it("logs 250 ml from the tray and refreshes the tooltip", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9, 0), applyAutostartOnSetup: false });
+    await c.start();
+    h.emitTrayLog(250);
+    await settle();
+    expect(store.getState().data.log["2026-11-04"]?.map((e) => e.ml)).toEqual([250]);
+    expect(h.tooltips.some((t) => t.includes("250 / 2,000 ml"))).toBe(true);
+    c.dispose();
+  });
+
+  it("pauses for 60 min from the tray and shows it in the tooltip", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    h.emitTrayPause(60);
+    await settle();
+    expect(store.getState().data.state.pausedUntil).toBe(iso(10));
+    expect(h.tooltips.some((t) => t.includes("paused until 10:00"))).toBe(true);
+    c.dispose();
+  });
+});
+
+describe("controller celebration and settings", () => {
+  it("celebrates once per day and sends no reminder when the goal is met", async () => {
+    // autostartEnabled true so boot reconciliation makes no data change here.
+    const h = createFakePlatform({ autostartEnabled: true });
+    const store = buildStore((d) => {
+      d.settings.dailyGoalMl = 500;
+      d.log["2026-11-04"] = [{ t: iso(8), ml: 500 }]; // goal already met
+    });
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.sent).toHaveLength(0); // goal met: no reminder
+    expect(h.ribbitCount()).toBe(0);
+    c.logDrink(250); // a data change while met triggers the one celebration
+    await settle();
+    expect(h.ribbitCount()).toBe(1);
+    expect(store.getState().data.state.lastCelebratedDate).toBe("2026-11-04");
+    c.logDrink(250); // still over goal, no second celebration
+    await settle();
+    expect(h.ribbitCount()).toBe(1);
+    expect(h.sent).toHaveLength(0);
+    c.dispose();
+  });
+
+  it("re-evaluates when settings change", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(8, 30), applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.sent).toHaveLength(0);
+    await c.saveSettings({ ...store.getState().data.settings, reminderEveryMin: 1 });
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    c.dispose();
+  });
+
+  it("reverts launchAtLogin when the OS autostart call throws", async () => {
+    // autostartEnabled true so boot reconciliation leaves launchAtLogin on.
+    const h = createFakePlatform({ autostartThrows: true, autostartEnabled: true });
+    const store = buildStore(); // launchAtLogin defaults to true
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    const result = await c.saveSettings({ ...store.getState().data.settings, launchAtLogin: false });
+    expect(result.ok).toBe(false);
+    expect(h.autostartCalls).toEqual([false]);
+    expect(store.getState().data.settings.launchAtLogin).toBe(true);
+    c.dispose();
+  });
+});
+
+describe("controller setup and boot", () => {
+  it("does not touch the OS autostart when applyAutostartOnSetup is false", async () => {
+    const h = createFakePlatform();
+    const store = buildStore((d) => {
+      d.settings.setupDone = false;
+    });
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    await c.completeSetup({ dailyGoalMl: 2000, activeHours: { start: "08:00", end: "22:00" }, frogName: "Ribbit" });
+    await settle();
+    expect(h.autostartCalls).toHaveLength(0);
+    expect(store.getState().ui.notificationsBlocked).toBe(false);
+    c.dispose();
+  });
+
+  it("reads the OS autostart at boot and copies it into settings without writing", async () => {
+    const h = createFakePlatform({ autostartSupported: true, autostartEnabled: false });
+    const store = buildStore(); // launchAtLogin defaults to true
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    await settle();
+    expect(h.autostartCalls).toHaveLength(0);
+    expect(store.getState().data.settings.launchAtLogin).toBe(false);
+    c.dispose();
+  });
+});
+
+describe("controller lifecycle", () => {
+  it("removes all listeners on dispose", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.activeListeners()).toBe(4);
+    c.dispose();
+    expect(h.activeListeners()).toBe(0);
+  });
+
+  it("leaks nothing when disposed during pending subscriptions", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    const startPromise = c.start();
+    c.dispose();
+    await startPromise;
+    await settle();
+    expect(h.activeListeners()).toBe(0);
+  });
+
+  it("persists every data change so the reloaded store equals state", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start();
+    c.logDrink(250);
+    c.logDrink(150);
+    await settle();
+    const reloaded = await h.platform.persistence.load();
+    expect(reloaded).toEqual(store.getState().data);
+    c.dispose();
+  });
+});

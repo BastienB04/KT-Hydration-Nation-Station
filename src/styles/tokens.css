@@ -14,6 +14,7 @@
   --text-muted: #5f6b63;
   --accent: var(--lily-green);
   --accent-strong: var(--deep-pond);
+  --on-accent-strong: #fff;
   --water: var(--pond-blue);
 
   --radius-s: 10px;
@@ -36,6 +37,7 @@
     --text-muted: #a9c3b7;
     --accent: #7fd36c;
     --accent-strong: #a8e69a;
+    --on-accent-strong: var(--dark-pond);
     --water: #5fb3e0;
     --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
   }

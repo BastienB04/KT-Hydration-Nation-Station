@@ -7,13 +7,39 @@
 
 use std::{thread, time::Duration};
 
-use tauri::menu::{Menu, MenuItem};
+use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Runtime};
 
 const TRAY_ID: &str = "main";
 const TICK_SECONDS: u64 = 30;
 const MINIMIZED_FLAG: &str = "--minimized";
+
+// Tray-driven frontend events. The frontend validates these payloads before use.
+const TRAY_LOG_EVENT: &str = "tray-log";
+const TRAY_PAUSE_EVENT: &str = "tray-pause";
+const TRAY_LOG_ML: u32 = 250;
+const TRAY_PAUSE_MINUTES: u32 = 60;
+
+/// A tray menu action, resolved from a menu-item id.
+#[derive(Debug, PartialEq, Eq)]
+enum TrayAction {
+    Open,
+    Log(u32),
+    Pause(u32),
+    Quit,
+}
+
+/// Map a menu-item id to its action, or `None` for an unknown id.
+fn tray_action(id: &str) -> Option<TrayAction> {
+    match id {
+        "open" => Some(TrayAction::Open),
+        "log_250" => Some(TrayAction::Log(TRAY_LOG_ML)),
+        "pause_1h" => Some(TrayAction::Pause(TRAY_PAUSE_MINUTES)),
+        "quit" => Some(TrayAction::Quit),
+        _ => None,
+    }
+}
 
 /// Show, un-minimize and focus the main window. Used by the tray, the
 /// single-instance handler, the macOS Dock and the first launch.
@@ -41,8 +67,11 @@ fn set_tray_tooltip(app: AppHandle, text: String) -> Result<(), String> {
 /// code path and is verified in the Windows VM.
 fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let open = MenuItem::with_id(app, "open", "Open", true, None::<&str>)?;
+    let log = MenuItem::with_id(app, "log_250", "Log 250 ml", true, None::<&str>)?;
+    let pause = MenuItem::with_id(app, "pause_1h", "Pause 1 h", true, None::<&str>)?;
+    let separator = PredefinedMenuItem::separator(app)?;
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
-    let menu = Menu::with_items(app, &[&open, &quit])?;
+    let menu = Menu::with_items(app, &[&open, &log, &pause, &separator, &quit])?;
 
     let icon = app
         .default_window_icon()
@@ -54,10 +83,16 @@ fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
         .tooltip("KT-Hydration-Nation-Station")
         .menu(&menu)
         .show_menu_on_left_click(false)
-        .on_menu_event(|app, event| match event.id().as_ref() {
-            "open" => show_main(app),
-            "quit" => app.exit(0),
-            _ => {}
+        .on_menu_event(|app, event| match tray_action(event.id().as_ref()) {
+            Some(TrayAction::Open) => show_main(app),
+            Some(TrayAction::Log(ml)) => {
+                let _ = app.emit(TRAY_LOG_EVENT, ml);
+            }
+            Some(TrayAction::Pause(minutes)) => {
+                let _ = app.emit(TRAY_PAUSE_EVENT, minutes);
+            }
+            Some(TrayAction::Quit) => app.exit(0),
+            None => {}
         })
         .on_tray_icon_event(|tray, event| {
             if let TrayIconEvent::Click {
@@ -105,9 +140,11 @@ pub fn run() {
             // Ticker. WebView timers are throttled while the window is hidden; a plain
             // thread is not, so the frontend's scheduler is driven from here.
             let handle = app.handle().clone();
-            thread::spawn(move || loop {
-                thread::sleep(Duration::from_secs(TICK_SECONDS));
-                let _ = handle.emit("tick", ());
+            thread::spawn(move || {
+                loop {
+                    thread::sleep(Duration::from_secs(TICK_SECONDS));
+                    let _ = handle.emit("tick", ());
+                }
             });
 
             Ok(())
@@ -128,4 +165,26 @@ pub fn run() {
         #[cfg(not(target_os = "macos"))]
         let _ = (app, event);
     });
+}
+
+#[cfg(test)]
+mod tests {
+    use super::{TRAY_LOG_ML, TRAY_PAUSE_MINUTES, TrayAction, tray_action};
+
+    #[test]
+    fn known_ids_map_to_actions() {
+        assert_eq!(tray_action("open"), Some(TrayAction::Open));
+        assert_eq!(tray_action("log_250"), Some(TrayAction::Log(TRAY_LOG_ML)));
+        assert_eq!(
+            tray_action("pause_1h"),
+            Some(TrayAction::Pause(TRAY_PAUSE_MINUTES))
+        );
+        assert_eq!(tray_action("quit"), Some(TrayAction::Quit));
+    }
+
+    #[test]
+    fn unknown_id_maps_to_none() {
+        assert_eq!(tray_action("nope"), None);
+        assert_eq!(tray_action(""), None);
+    }
 }

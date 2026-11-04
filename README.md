@@ -2,7 +2,7 @@
 
 A small Windows desktop app in which Ribbit, a cartoon frog, reminds you to drink water. Log what you drink, watch the pond fill up, keep your streak of lily pads going.
 
-**Status: in development (Phase 2 of 8).** No installer is published yet. The plan and requirements are in [`docs/Requirements_Scoping_Refined.md`](docs/Requirements_Scoping_Refined.md).
+**Status: in development (Phase 3 of 8).** No installer is published yet. The plan and requirements are in [`docs/Requirements_Scoping_Refined.md`](docs/Requirements_Scoping_Refined.md).
 
 ## Install (Windows)
 
@@ -17,8 +17,11 @@ npm install
 npm run tauri dev      # desktop app with hot reload
 npm run dev            # UI only, in a browser at http://localhost:1420
 npm run build          # type-check and bundle the frontend
+npm test -- --run      # unit tests (Vitest)
 npm run tauri build    # local installer for your current OS
 ```
+
+Your data (intake log and settings) lives in a `store.json` file in the OS app-data folder for the app identifier (on Windows, `%APPDATA%\com.bastienb04.kt-hydration-nation-station\`).
 
 Windows installers for releases are built by GitHub Actions (`.github/workflows`), not on a developer machine.
 

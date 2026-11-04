@@ -1,0 +1,386 @@
+/* Phase 3 functional styling. Uses only the tokens in tokens.css; Phase 4 does
+   the frog art, pond polish and celebration. Laid out to fit 360x600. */
+
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+.section__title {
+  margin: 4px 0;
+  font-size: 1rem;
+  color: var(--accent-strong);
+}
+
+/* Buttons */
+.btn {
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-m);
+  padding: 9px 14px;
+  background: var(--surface);
+  color: var(--text);
+  font-weight: 700;
+}
+
+.btn:hover {
+  border-color: var(--accent-strong);
+}
+
+.btn--primary {
+  background: var(--accent-strong);
+  color: var(--on-accent-strong);
+  border-color: var(--accent-strong);
+}
+
+.btn--ghost {
+  background: transparent;
+  border-color: transparent;
+  color: var(--accent-strong);
+}
+
+.btn--small {
+  padding: 5px 10px;
+  font-size: 0.85rem;
+  border-radius: var(--radius-s);
+}
+
+.btn--danger {
+  background: var(--blush);
+  border-color: var(--blush);
+  color: var(--fly-black);
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* Pond */
+.pond-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.pond {
+  position: relative;
+  overflow: hidden;
+  background: radial-gradient(circle at 50% 35%, #cdeafb, var(--surface));
+}
+
+.pond__water {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(var(--water), var(--accent-strong));
+  transition: height var(--duration-slow) var(--ease-bounce);
+}
+
+.pond__readout {
+  margin: 2px 0 0;
+  font-size: 1.05rem;
+}
+
+.pond__met {
+  margin: 0;
+  color: var(--accent-strong);
+  font-weight: 700;
+}
+
+/* Quick-add */
+.quick-add,
+.today,
+.reminder,
+.tip-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.quick-add__buttons {
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 8px;
+}
+
+.quick-add__custom-row {
+  display: flex;
+  gap: 8px;
+}
+
+.quick-add__custom-row input,
+.field input[type="number"],
+.field input[type="text"],
+.field input[type="time"] {
+  flex: 1;
+  min-width: 0;
+  padding: 8px 10px;
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-s);
+  background: var(--surface);
+  color: var(--text);
+}
+
+.field-error {
+  margin: 2px 0 0;
+  color: #b4371f;
+  font-size: 0.85rem;
+}
+
+@media (prefers-color-scheme: dark) {
+  .field-error {
+    color: #ff9e86;
+  }
+}
+
+/* Today list */
+.today__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.today__row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.today__time {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.today__amount {
+  font-weight: 700;
+  margin-right: auto;
+}
+
+.today__edit {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+  width: 100%;
+}
+
+.today__edit input {
+  width: 90px;
+}
+
+/* Reminder */
+.reminder__status {
+  margin: 0;
+  font-weight: 700;
+}
+
+.reminder__controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+/* Banners */
+.banner {
+  margin: 0 18px 8px;
+  padding: 8px 12px;
+  border-radius: var(--radius-s);
+  font-size: 0.9rem;
+}
+
+.banner--alert {
+  background: var(--blush);
+  color: var(--fly-black);
+}
+
+.banner--warn {
+  background: var(--sunny-cream);
+  color: var(--fly-black);
+  border: 1px solid var(--accent);
+}
+
+/* Tips */
+.tip-card {
+  padding: 12px;
+  background: var(--surface);
+  border-radius: var(--radius-m);
+  box-shadow: var(--shadow);
+}
+
+.tip-card__text {
+  margin: 0;
+}
+
+.tip-card__disclaimer {
+  margin: 0;
+  font-size: 0.75rem;
+  color: var(--text-muted);
+}
+
+/* History */
+.history__streak {
+  margin: 0;
+  font-weight: 800;
+  color: var(--accent-strong);
+}
+
+.history__list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.history__row {
+  display: grid;
+  grid-template-columns: 64px 1fr;
+  grid-template-areas: "label bar" "label value";
+  gap: 2px 8px;
+  align-items: center;
+}
+
+.history__label {
+  grid-area: label;
+  font-size: 0.85rem;
+  color: var(--text-muted);
+}
+
+.history__bar-track {
+  grid-area: bar;
+  position: relative;
+  height: 14px;
+  background: var(--surface);
+  border-radius: var(--radius-s);
+  box-shadow: inset 0 0 0 1px rgba(31, 111, 91, 0.2);
+  overflow: hidden;
+}
+
+.history__bar {
+  display: block;
+  height: 100%;
+  background: var(--water);
+  max-width: 125%;
+}
+
+.history__bar--met {
+  background: var(--accent-strong);
+}
+
+.history__goal-marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 80%;
+  width: 2px;
+  background: var(--fly-black);
+  opacity: 0.4;
+}
+
+.history__value {
+  grid-area: value;
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+/* Settings and forms */
+.settings,
+.setup__panel {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border: 0;
+  padding: 0;
+  margin: 0;
+}
+
+.field--check {
+  flex-direction: row;
+  align-items: center;
+  gap: 8px;
+}
+
+.field__hint {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+.field__group-label {
+  font-weight: 700;
+}
+
+.settings__quick,
+.settings__days,
+.settings__hours {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.settings__quick input {
+  width: 80px;
+}
+
+.settings__hours input[type="time"] {
+  width: auto;
+  flex: 0 0 auto;
+}
+
+.settings__day {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.settings__status {
+  margin: 0;
+  color: var(--accent-strong);
+  min-height: 1.1em;
+}
+
+.settings__reset {
+  margin-top: 16px;
+  padding-top: 12px;
+  border-top: 1px solid rgba(31, 111, 91, 0.2);
+}
+
+.confirm {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* Setup */
+.setup__step {
+  margin: 0;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.setup__nav {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}

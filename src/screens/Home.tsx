@@ -1,11 +1,25 @@
-/** Home ("Pond") screen. Phase 2 placeholder; the real pond, frog and quick-add arrive in Phase 3. */
+/** Home ("Pond"): progress, quick-add, today's sips, reminder status and a tip. */
+import { Pond } from "../components/Pond";
+import { QuickAdd } from "../components/QuickAdd";
+import { ReminderStatus } from "../components/ReminderStatus";
+import { TipCard } from "../components/TipCard";
+import { TodayList } from "../components/TodayList";
+import { todayEntries, todayTotal } from "../core/stats";
+import { useData } from "../state/AppContext";
+
 export function Home() {
+  const data = useData();
+  const total = todayTotal(data.log, Date.now());
+  const goal = data.settings.dailyGoalMl;
+  const hasEntriesToday = todayEntries(data.log, Date.now()).length > 0;
+
   return (
     <section className="screen">
-      <div className="pond pond--placeholder" aria-hidden="true">
-        <div className="frog-placeholder">🐸</div>
-      </div>
-      <p className="screen__hint">Ribbit is waiting for Phase 3: pond level, quick-add and the first tip.</p>
+      <Pond total={total} goal={goal} met={total >= goal} />
+      <QuickAdd hasEntriesToday={hasEntriesToday} />
+      <ReminderStatus />
+      <TodayList />
+      <TipCard />
     </section>
   );
 }

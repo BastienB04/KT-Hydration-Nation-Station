@@ -26,6 +26,17 @@ button {
   cursor: pointer;
 }
 
+/* The body disables selection; inputs and textareas must stay editable. */
+input,
+textarea {
+  user-select: text;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent-strong);
+  outline-offset: 2px;
+}
+
 /* App shell: header / scrolling main / bottom nav */
 .app {
   height: 100%;
@@ -84,8 +95,8 @@ button {
 }
 
 .nav__item--active {
-  background: var(--accent);
-  color: #fff;
+  background: var(--accent-strong);
+  color: var(--on-accent-strong);
 }
 
 /* Screens */
@@ -132,5 +143,14 @@ button {
   }
   50% {
     transform: translateY(-8px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .frog-placeholder {
+    animation: none;
+  }
+  * {
+    transition: none !important;
   }
 }

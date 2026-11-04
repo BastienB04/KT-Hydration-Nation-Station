@@ -1,72 +1,83 @@
 import { useEffect, useState } from "react";
-import { startRuntime, type Runtime, type RuntimeKind } from "./core/runtime";
-import { Home } from "./screens/Home";
-import { History } from "./screens/History";
-import { Settings } from "./screens/Settings";
-import { About } from "./screens/About";
+import { createController, type Controller } from "./app/controller";
+import { migrate } from "./core/migrate";
+import { createPlatform } from "./platform";
+import { Shell } from "./app/Shell";
+import { Setup } from "./screens/Setup";
+import { AppProvider, useData } from "./state/AppContext";
+import { createAppStore, type AppStore } from "./state/store";
 
-export type Screen = "home" | "history" | "settings" | "about";
+interface Ready {
+  store: AppStore;
+  controller: Controller;
+  platformKind: "tauri" | "browser";
+}
 
-const NAV: { id: Screen; label: string }[] = [
-  { id: "home", label: "Pond" },
-  { id: "history", label: "Week" },
-  { id: "settings", label: "Settings" },
-  { id: "about", label: "About" },
-];
+function Root() {
+  const data = useData();
+  return data.settings.setupDone ? <Shell /> : <Setup />;
+}
 
 export default function App() {
-  const [screen, setScreen] = useState<Screen>("home");
-  const [ticks, setTicks] = useState(0);
-  const [runtimeKind, setRuntimeKind] = useState<RuntimeKind | "starting">("starting");
+  const [ready, setReady] = useState<Ready | null>(null);
 
   useEffect(() => {
     let disposed = false;
-    let runtime: Runtime | undefined;
+    let platform: Awaited<ReturnType<typeof createPlatform>> | undefined;
+    let controller: Controller | undefined;
 
-    startRuntime({ onTick: () => setTicks((n) => n + 1) }).then((rt) => {
+    (async () => {
+      const pl = await createPlatform();
       if (disposed) {
-        rt.dispose();
+        pl.dispose();
         return;
       }
-      runtime = rt;
-      setRuntimeKind(rt.kind);
-    });
+      platform = pl;
+
+      let raw: unknown;
+      let loadFailed = false;
+      try {
+        raw = await pl.persistence.load();
+      } catch {
+        loadFailed = true;
+      }
+
+      const { data, changed } = migrate(raw);
+      const store = createAppStore({
+        data,
+        ui: { saveError: loadFailed ? "Couldn't read your saved data; starting fresh." : null, notificationsBlocked: false },
+      });
+      controller = createController({
+        store,
+        platform: pl,
+        applyAutostartOnSetup: import.meta.env.PROD,
+      });
+
+      if (disposed) {
+        controller.dispose();
+        pl.dispose();
+        return;
+      }
+
+      setReady({ store, controller, platformKind: pl.kind });
+      await controller.start();
+      if (changed) controller.persist();
+    })();
 
     return () => {
       disposed = true;
-      runtime?.dispose();
+      controller?.dispose();
+      platform?.dispose();
     };
   }, []);
 
+  if (!ready) {
+    return <p role="status">Ribbit is waking up…</p>;
+  }
+
   return (
-    <div className="app">
-      <header className="app__header">
-        <span className="app__brand">Ribbit</span>
-        <span className="app__status" title="Phase 2 skeleton: proves the Rust ticker reaches the UI">
-          {runtimeKind} · ticks {ticks}
-        </span>
-      </header>
-
-      <main className="app__main">
-        {screen === "home" && <Home />}
-        {screen === "history" && <History />}
-        {screen === "settings" && <Settings />}
-        {screen === "about" && <About />}
-      </main>
-
-      <nav className="app__nav" aria-label="Main">
-        {NAV.map((item) => (
-          <button
-            key={item.id}
-            type="button"
-            className={item.id === screen ? "nav__item nav__item--active" : "nav__item"}
-            aria-current={item.id === screen ? "page" : undefined}
-            onClick={() => setScreen(item.id)}
-          >
-            {item.label}
-          </button>
-        ))}
-      </nav>
-    </div>
+    <AppProvider store={ready.store} controller={ready.controller} platformKind={ready.platformKind}>
+      <Root />
+    </AppProvider>
   );
 }
