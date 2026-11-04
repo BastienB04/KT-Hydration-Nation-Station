@@ -2,7 +2,7 @@
 import { useEffect, useRef, useState } from "react";
 import { DEFAULT_SETTINGS, LIMITS } from "../core/schema";
 import { parseHHMM } from "../core/time";
-import { parseAmount } from "../core/settings";
+import { parseGoal } from "../core/settings";
 import { FLUID_DISCLAIMER } from "../core/tips";
 import { useController } from "../state/AppContext";
 
@@ -23,8 +23,7 @@ export function Setup() {
 
   function next() {
     if (step === 1) {
-      const result = parseAmount(goal);
-      if (!result.ok || result.ml < LIMITS.goalMinMl || result.ml > LIMITS.goalMaxMl) {
+      if (parseGoal(goal) === null) {
         setError(`Goal must be ${LIMITS.goalMinMl}–${LIMITS.goalMaxMl} ml.`);
         return;
       }
@@ -47,7 +46,7 @@ export function Setup() {
       return;
     }
     controller.completeSetup({
-      dailyGoalMl: Number(goal),
+      dailyGoalMl: parseGoal(goal) ?? DEFAULT_SETTINGS.dailyGoalMl,
       activeHours: { start, end },
       frogName: name,
     });

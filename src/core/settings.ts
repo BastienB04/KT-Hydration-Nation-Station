@@ -75,6 +75,11 @@ function parseIntField(text: string, min: number, max: number): number | null {
   return n >= min && n <= max ? n : null;
 }
 
+/** Parse a daily goal: a whole number within the goal limits, else null. */
+export function parseGoal(text: string): number | null {
+  return parseIntField(text, LIMITS.goalMinMl, LIMITS.goalMaxMl);
+}
+
 /** Validate a draft into Settings, collecting per-field errors. */
 export function validateSettingsDraft(draft: SettingsDraft): SettingsDraftResult {
   const errors: Partial<Record<SettingsErrorKey, string>> = {};

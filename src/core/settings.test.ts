@@ -4,8 +4,25 @@ import {
   draftFromSettings,
   normalizeSettings,
   parseAmount,
+  parseGoal,
   validateSettingsDraft,
 } from "./settings";
+
+describe("parseGoal (first-run setup goal)", () => {
+  it("accepts the full 100–10,000 ml goal range, not the per-sip cap", () => {
+    expect(parseGoal("100")).toBe(100);
+    expect(parseGoal("5001")).toBe(5001);
+    expect(parseGoal(" 10000 ")).toBe(10000);
+  });
+
+  it("rejects out-of-range and malformed goals", () => {
+    expect(parseGoal("99")).toBeNull();
+    expect(parseGoal("10001")).toBeNull();
+    expect(parseGoal("")).toBeNull();
+    expect(parseGoal("2.5")).toBeNull();
+    expect(parseGoal("-500")).toBeNull();
+  });
+});
 
 describe("parseAmount", () => {
   it("accepts and rejects the expected inputs", () => {
