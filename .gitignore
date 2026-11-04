@@ -27,3 +27,6 @@ dist-ssr
 *.key
 .env
 .env.*
+
+# Local continuation record; symlinked to ~/kiro-scratch and never committed
+/HANDOVER.md
