@@ -1,0 +1,42 @@
+/* Design tokens: the whole frog palette lives here (Requirements 3.4). */
+:root {
+  --lily-green: #6bbf59;
+  --deep-pond: #1f6f5b;
+  --pond-blue: #4fa3d1;
+  --sunny-cream: #fff7d6;
+  --dark-pond: #0f2e2a;
+  --blush: #f7a7b8;
+  --fly-black: #2b2b2b;
+
+  --bg: var(--sunny-cream);
+  --surface: #ffffff;
+  --text: var(--fly-black);
+  --text-muted: #5f6b63;
+  --accent: var(--lily-green);
+  --accent-strong: var(--deep-pond);
+  --water: var(--pond-blue);
+
+  --radius-s: 10px;
+  --radius-m: 18px;
+  --radius-l: 28px;
+  --shadow: 0 6px 20px rgba(31, 111, 91, 0.12);
+
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --duration-fast: 160ms;
+  --duration-slow: 600ms;
+
+  --font: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: var(--dark-pond);
+    --surface: #173f3a;
+    --text: #f1f7f2;
+    --text-muted: #a9c3b7;
+    --accent: #7fd36c;
+    --accent-strong: #a8e69a;
+    --water: #5fb3e0;
+    --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+  }
+}
