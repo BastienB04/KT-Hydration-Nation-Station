@@ -81,10 +81,11 @@ pub fn run() {
         .plugin(tauri_plugin_single_instance::init(|app, _args, _cwd| {
             show_main(app)
         }))
+        // Windows: HKCU Run key. macOS: LaunchAgent (the builder's default; the
+        // `macos_launcher` setter only exists when compiling for macOS).
         .plugin(
             tauri_plugin_autostart::Builder::new()
                 .args([MINIMIZED_FLAG])
-                .macos_launcher(tauri_plugin_autostart::MacosLauncher::LaunchAgent)
                 .build(),
         )
         .plugin(tauri_plugin_store::Builder::new().build())
