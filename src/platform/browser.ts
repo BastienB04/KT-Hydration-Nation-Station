@@ -117,6 +117,9 @@ export function createBrowserPlatform(): Platform & { dispose(): void } {
       async onTrayPause() {
         return () => {};
       },
+      async onNotificationOpen() {
+        return () => {};
+      },
     },
     dispose() {
       sound.dispose();

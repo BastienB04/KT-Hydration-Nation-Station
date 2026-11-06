@@ -18,6 +18,14 @@ import { createWebAudioSound } from "./sound";
 import type { Platform } from "./types";
 
 const STORE_FILE = "store.json";
+/**
+ * Must match `REMINDER_ACTION_TYPE` in `src-tauri/src/lib.rs`. Rust registers it
+ * on macOS only (an "Open" button, needed there for body clicks to be reported);
+ * on Windows the id is unregistered, so the plugin ignores it and the toast stays plain.
+ */
+const REMINDER_ACTION_TYPE = "reminder";
+/** Emitted by Rust after a reminder notification is clicked. */
+const NOTIFICATION_OPEN_EVENT = "notification-open";
 
 function positiveInt(value: unknown): number | null {
   return typeof value === "number" && Number.isInteger(value) && value > 0 ? value : null;
@@ -70,7 +78,7 @@ export function createTauriPlatform(): Platform & { dispose(): void } {
         const ok = await this.ensurePermission();
         if (!ok) return false;
         try {
-          sendNotification({ title, body });
+          sendNotification({ title, body, actionTypeId: REMINDER_ACTION_TYPE });
           return true;
         } catch {
           return false;
@@ -120,6 +128,9 @@ export function createTauriPlatform(): Platform & { dispose(): void } {
           const minutes = positiveInt(payload);
           if (minutes !== null) cb(minutes);
         });
+      },
+      async onNotificationOpen(cb) {
+        return listen(NOTIFICATION_OPEN_EVENT, () => cb());
       },
     },
     dispose() {

@@ -35,6 +35,8 @@ export interface PlatformEvents {
   onWake(cb: () => void): Promise<() => void>;
   onTrayLog(cb: (ml: number) => void): Promise<() => void>;
   onTrayPause(cb: (minutes: number) => void): Promise<() => void>;
+  /** The user clicked a reminder notification; the window is being restored. */
+  onNotificationOpen(cb: () => void): Promise<() => void>;
 }
 
 export interface Platform {

@@ -1,6 +1,7 @@
 /**
  * Test-only in-memory platform. Records side effects and lets a test emit
- * ticks, wakes and tray actions. Never imported by application code.
+ * ticks, wakes, tray actions and notification clicks. Never imported by
+ * application code.
  */
 import { createMemoryPersistence } from "../platform/memory";
 import type { Platform } from "../platform/types";
@@ -26,6 +27,7 @@ export interface FakePlatformHandle {
   emitWake(): void;
   emitTrayLog(ml: number): void;
   emitTrayPause(minutes: number): void;
+  emitNotificationOpen(): void;
 }
 
 export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatformHandle {
@@ -41,6 +43,7 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
   const wakeCbs = new Set<() => void>();
   const trayLogCbs = new Set<(ml: number) => void>();
   const trayPauseCbs = new Set<(minutes: number) => void>();
+  const notificationOpenCbs = new Set<() => void>();
 
   const platform: Platform = {
     kind: "browser",
@@ -93,6 +96,10 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
         trayPauseCbs.add(cb);
         return () => trayPauseCbs.delete(cb);
       },
+      async onNotificationOpen(cb) {
+        notificationOpenCbs.add(cb);
+        return () => notificationOpenCbs.delete(cb);
+      },
     },
   };
 
@@ -102,7 +109,8 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
     tooltips,
     autostartCalls,
     ribbitCount: () => ribbits,
-    activeListeners: () => tickCbs.size + wakeCbs.size + trayLogCbs.size + trayPauseCbs.size,
+    activeListeners: () =>
+      tickCbs.size + wakeCbs.size + trayLogCbs.size + trayPauseCbs.size + notificationOpenCbs.size,
     setGranted: (value) => {
       granted = value;
     },
@@ -120,6 +128,9 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
     },
     emitTrayPause: (minutes) => {
       for (const cb of [...trayPauseCbs]) cb(minutes);
+    },
+    emitNotificationOpen: () => {
+      for (const cb of [...notificationOpenCbs]) cb();
     },
   };
 }

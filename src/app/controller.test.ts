@@ -127,6 +127,55 @@ describe("controller tray actions", () => {
   });
 });
 
+describe("controller notification clicks", () => {
+  it("listens for clicks before the first reminder can be sent", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    let listening = -1;
+    const send = h.platform.notifier.send.bind(h.platform.notifier);
+    h.platform.notifier.send = async (title, body) => {
+      listening = h.activeListeners();
+      return send(title, body);
+    };
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start(); // due at boot: fires once
+    expect(h.sent).toHaveLength(1);
+    expect(listening).toBe(5);
+    c.dispose();
+  });
+
+  it("relays each click to every subscriber until it unsubscribes", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(8, 30), applyAutostartOnSetup: false });
+    await c.start();
+    let a = 0;
+    let b = 0;
+    const offA = c.onNotificationOpen(() => (a += 1));
+    c.onNotificationOpen(() => (b += 1));
+    h.emitNotificationOpen();
+    expect([a, b]).toEqual([1, 1]);
+    offA();
+    h.emitNotificationOpen();
+    expect([a, b]).toEqual([1, 2]);
+    c.dispose();
+  });
+
+  it("does nothing after dispose", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(8, 30), applyAutostartOnSetup: false });
+    await c.start();
+    let opened = 0;
+    const off = c.onNotificationOpen(() => (opened += 1));
+    c.dispose();
+    h.emitNotificationOpen();
+    expect(opened).toBe(0);
+    expect(h.activeListeners()).toBe(0);
+    off(); // a late unsubscribe after dispose is harmless
+  });
+});
+
 describe("controller celebration and settings", () => {
   it("celebrates once per day and sends no reminder when the goal is met", async () => {
     // autostartEnabled true so boot reconciliation makes no data change here.
@@ -209,7 +258,7 @@ describe("controller lifecycle", () => {
     const store = buildStore();
     const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
     await c.start();
-    expect(h.activeListeners()).toBe(4);
+    expect(h.activeListeners()).toBe(5);
     c.dispose();
     expect(h.activeListeners()).toBe(0);
   });

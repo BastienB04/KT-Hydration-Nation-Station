@@ -2,14 +2,13 @@
  * The app shell once setup is done: header with the frog's name, the active
  * screen, a save-error banner and the bottom navigation.
  */
-import { useState } from "react";
-import { useData, useRoot } from "../state/AppContext";
+import { useEffect, useState } from "react";
+import { useController, useData, useRoot } from "../state/AppContext";
 import { Home } from "../screens/Home";
 import { History } from "../screens/History";
 import { Settings } from "../screens/Settings";
 import { About } from "../screens/About";
-
-type Screen = "home" | "history" | "settings" | "about";
+import { POND_SCREEN, openPondOnNotification, type Screen } from "./navigation";
 
 const NAV: { id: Screen; label: string }[] = [
   { id: "home", label: "Pond" },
@@ -19,9 +18,13 @@ const NAV: { id: Screen; label: string }[] = [
 ];
 
 export function Shell() {
-  const [screen, setScreen] = useState<Screen>("home");
+  const [screen, setScreen] = useState<Screen>(POND_SCREEN);
   const data = useData();
   const { ui } = useRoot();
+  const controller = useController();
+
+  // A click that arrives before this subscribes needs no replay: the Shell starts on Pond.
+  useEffect(() => openPondOnNotification(controller, setScreen), [controller]);
 
   return (
     <div className="app">

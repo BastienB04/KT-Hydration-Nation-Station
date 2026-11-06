@@ -10,6 +10,9 @@ use std::{thread, time::Duration};
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Runtime};
+use tauri_plugin_notification::NotificationExt;
+#[cfg(target_os = "macos")]
+use tauri_plugin_notification::{Action, ActionType};
 
 const TRAY_ID: &str = "main";
 const TICK_SECONDS: u64 = 30;
@@ -20,6 +23,24 @@ const TRAY_LOG_EVENT: &str = "tray-log";
 const TRAY_PAUSE_EVENT: &str = "tray-pause";
 const TRAY_LOG_ML: u32 = 250;
 const TRAY_PAUSE_MINUTES: u32 = 60;
+
+// Notification activation. The plugin reports a click on the notification body as
+// `tap` and a button click as that action's id. The frontend switches to Pond on
+// NOTIFICATION_OPEN_EVENT.
+const NOTIFICATION_OPEN_EVENT: &str = "notification-open";
+const TAP_ACTION: &str = "tap";
+const OPEN_ACTION: &str = "open";
+/// Must match `REMINDER_ACTION_TYPE` in `src/platform/tauri.ts`. Registered on macOS
+/// only: its NSUserNotificationCenter backend reports a body click only when the
+/// notification has at least one action. Windows reports plain-toast body clicks
+/// and ignores the unregistered id, so its toast stays without a button.
+#[cfg(target_os = "macos")]
+const REMINDER_ACTION_TYPE: &str = "reminder";
+
+/// Whether a notification action should bring the main window back.
+fn notification_opens_main(action_id: &str) -> bool {
+    matches!(action_id, TAP_ACTION | OPEN_ACTION)
+}
 
 /// A tray menu action, resolved from a menu-item id.
 #[derive(Debug, PartialEq, Eq)]
@@ -42,7 +63,7 @@ fn tray_action(id: &str) -> Option<TrayAction> {
 }
 
 /// Show, un-minimize and focus the main window. Used by the tray, the
-/// single-instance handler, the macOS Dock and the first launch.
+/// single-instance handler, the macOS Dock, notification clicks and the first launch.
 fn show_main<R: Runtime>(app: &AppHandle<R>) {
     if let Some(window) = app.get_webview_window("main") {
         let _ = window.show();
@@ -130,6 +151,28 @@ pub fn run() {
         .setup(|app| {
             build_tray(app.handle())?;
 
+            // Notification clicks. Registered here, before the webview can send a
+            // reminder, because the plugin tracks only notifications shown while a
+            // handler exists. The handler lives for the whole process (the plugin has
+            // no way to remove it) and runs on the plugin's `notification` thread, so
+            // it only queues work: `emit` and the window calls are dispatched to the
+            // main thread. The event goes out before the window is shown so the
+            // frontend can switch to Pond while still hidden; `show_main` runs either
+            // way, so a missing frontend listener never blocks the restore.
+            let handle = app.handle().clone();
+            app.notification().on_action(move |performed| {
+                if notification_opens_main(performed.action_id()) {
+                    let _ = handle.emit(NOTIFICATION_OPEN_EVENT, ());
+                    show_main(&handle);
+                }
+            })?;
+            #[cfg(target_os = "macos")]
+            app.notification().register_action_types(vec![
+                ActionType::builder(REMINDER_ACTION_TYPE)
+                    .actions(vec![Action::builder(OPEN_ACTION, "Open").build()])
+                    .build(),
+            ])?;
+
             // The window is created hidden (tauri.conf.json). Show it unless we were
             // launched by autostart with --minimized, in which case we stay in the tray.
             let launched_minimized = std::env::args().any(|arg| arg == MINIMIZED_FLAG);
@@ -169,7 +212,9 @@ pub fn run() {
 
 #[cfg(test)]
 mod tests {
-    use super::{TRAY_LOG_ML, TRAY_PAUSE_MINUTES, TrayAction, tray_action};
+    use super::{
+        TRAY_LOG_ML, TRAY_PAUSE_MINUTES, TrayAction, notification_opens_main, tray_action,
+    };
 
     #[test]
     fn known_ids_map_to_actions() {
@@ -186,5 +231,18 @@ mod tests {
     fn unknown_id_maps_to_none() {
         assert_eq!(tray_action("nope"), None);
         assert_eq!(tray_action(""), None);
+    }
+
+    #[test]
+    fn body_click_and_open_action_restore_the_window() {
+        assert!(notification_opens_main("tap"));
+        assert!(notification_opens_main("open"));
+    }
+
+    #[test]
+    fn other_notification_actions_do_not_restore_the_window() {
+        for id in ["", "Open", "TAP", "snooze", "__closed"] {
+            assert!(!notification_opens_main(id), "{id:?} should not restore");
+        }
     }
 }

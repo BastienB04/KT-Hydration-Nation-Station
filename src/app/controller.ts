@@ -20,6 +20,11 @@ export interface Controller {
   /** Schedule a save of the current state (used when load migrated the data). */
   persist(): void;
   evaluate(): Promise<void>;
+  /**
+   * Subscribe to reminder-notification clicks (relayed from the platform once
+   * `start` has registered its listener). Returns an unsubscribe function.
+   */
+  onNotificationOpen(cb: () => void): () => void;
   logDrink(ml: number): boolean;
   undoLast(): void;
   editEntry(key: DateKey, index: number, t: string, ml: number): void;
@@ -59,6 +64,13 @@ export function createController(options: ControllerOptions): Controller {
   let disposed = false;
   let storeUnsub: (() => void) | null = null;
   const unlisteners: Array<() => void> = [];
+  const notificationOpenCbs = new Set<() => void>();
+
+  function relayNotificationOpen(): void {
+    if (disposed) return;
+    // Copy so a subscriber that unsubscribes mid-notify does not skip others.
+    for (const cb of [...notificationOpenCbs]) cb();
+  }
 
   function computeTooltip(): string {
     const { settings, log } = store.getState().data;
@@ -143,6 +155,7 @@ export function createController(options: ControllerOptions): Controller {
         track(platform.events.onWake(() => void evaluate())),
         track(platform.events.onTrayLog((ml) => void this.logDrink(ml))),
         track(platform.events.onTrayPause((minutes) => this.pauseFor(minutes))),
+        track(platform.events.onNotificationOpen(relayNotificationOpen)),
       ]);
 
       const { settings } = store.getState().data;
@@ -164,6 +177,7 @@ export function createController(options: ControllerOptions): Controller {
       disposed = true;
       for (const unlisten of unlisteners) unlisten();
       unlisteners.length = 0;
+      notificationOpenCbs.clear();
       storeUnsub?.();
       storeUnsub = null;
     },
@@ -173,6 +187,13 @@ export function createController(options: ControllerOptions): Controller {
     },
 
     evaluate,
+
+    onNotificationOpen(cb) {
+      notificationOpenCbs.add(cb);
+      return () => {
+        notificationOpenCbs.delete(cb);
+      };
+    },
 
     logDrink(ml: number): boolean {
       const before = store.getState();
