@@ -6,6 +6,7 @@ import { createContext, useContext, useSyncExternalStore, type ReactNode } from 
 import type { Controller } from "../app/controller";
 import type { AppStore } from "./store";
 import type { RootState } from "./reducer";
+import { uiClock } from "./uiClock";
 
 interface AppContextValue {
   store: AppStore;
@@ -47,4 +48,11 @@ export function useController(): Controller {
 
 export function usePlatformKind(): "tauri" | "browser" {
   return useAppContext().platformKind;
+}
+/**
+ * Re-render the calling component on the shared 30-second UI clock, for
+ * output that depends on Date.now() alone (read it during render).
+ */
+export function useUiClock(): number {
+  return useSyncExternalStore(uiClock.subscribe, uiClock.getSnapshot);
 }

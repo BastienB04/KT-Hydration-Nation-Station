@@ -3,13 +3,15 @@
  * Ribbit's mood, with Ribbit peeking over the card. When the goal is reached
  * while this card is on screen (the controller records lastCelebratedDate),
  * Ribbit cheers once with a small burst for CELEBRATE_MS, then settles back to
- * the steady hydrated pose.
+ * the steady hydrated pose. Re-renders on the shared UI clock, so the pose
+ * and label follow time-only changes (a pause ending, active hours ending).
  */
 import { useEffect, useRef, useState } from "react";
 import { formatMl } from "../core/format";
 import { moodLabel, pondMood } from "../core/mood";
 import type { PersistedData } from "../core/schema";
 import { progress, todayKey, todayTotal } from "../core/stats";
+import { useUiClock } from "../state/AppContext";
 import { Glyph, type GlyphName } from "./Glyph";
 import { PeekHeader } from "./PeekHeader";
 import { Ribbit } from "./Ribbit";
@@ -26,7 +28,9 @@ const BURST: GlyphName[] = [
   "prop/sparkle",
 ];
 
-export function Pond({ data, now }: { data: PersistedData; now: number }) {
+export function Pond({ data }: { data: PersistedData }) {
+  useUiClock();
+  const now = Date.now();
   const total = todayTotal(data.log, now);
   const goal = data.settings.dailyGoalMl;
   const percent = Math.round(progress(total, goal) * 100);

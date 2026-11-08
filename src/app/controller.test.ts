@@ -179,6 +179,67 @@ describe("controller tray due icon", () => {
     expect(h.attention).toEqual([true, false]);
     c.dispose();
   });
+  it("retries a failed due-icon update on the next tick, then dedupes", async () => {
+    const h = createFakePlatform({ autostartEnabled: true });
+    const store = buildStore();
+    let fail = true;
+    const setAttention = h.platform.tray.setAttention.bind(h.platform.tray);
+    h.platform.tray.setAttention = async (due) => {
+      await setAttention(due);
+      if (fail) throw new Error("tray unavailable");
+    };
+    let clock = at(8, 30);
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    await settle();
+    expect(h.attention).toEqual([false]);
+    fail = false;
+    clock = at(8, 40);
+    h.emitTick();
+    await settle();
+    expect(h.attention).toEqual([false, false]);
+    clock = at(8, 50);
+    h.emitTick();
+    await settle();
+    expect(h.attention).toEqual([false, false]);
+    c.dispose();
+  });
+  it("a stale failure cannot undo a newer due-icon state", async () => {
+    const h = createFakePlatform({ autostartEnabled: true });
+    const store = buildStore();
+    const calls: Array<{ resolve: () => void; reject: (e: Error) => void }> = [];
+    h.platform.tray.setAttention = (due) => {
+      h.attention.push(due);
+      return new Promise<void>((resolve, reject) => calls.push({ resolve, reject }));
+    };
+    let clock = at(8, 30);
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.attention).toEqual([false]); // call 0, still pending
+    clock = at(9);
+    h.emitTick();
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    expect(h.attention).toEqual([false, true]); // call 1, still pending
+    calls[0].reject(new Error("stale failure"));
+    await settle();
+    calls[1].resolve();
+    await settle();
+    clock = at(9, 10);
+    h.emitTick();
+    await settle();
+    expect(h.attention).toEqual([false, true]); // newer true is still cached
+    c.logDrink(250);
+    await settle();
+    expect(h.attention).toEqual([false, true, false]);
+    calls[2].reject(new Error("latest failure"));
+    await settle();
+    clock = at(9, 11);
+    h.emitTick();
+    await settle();
+    expect(h.attention).toEqual([false, true, false, false]); // latest failure retried
+    c.dispose();
+  });
 });
 
 describe("controller notification clicks", () => {

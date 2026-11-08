@@ -35,3 +35,9 @@ dist-ssr
 /frog_graphic_art_theme/basis_raw/
 /frog_graphic_art_theme/scratch/
 /frog_graphic_art_theme/review/
+
+# Generated test output (Vitest reporter/cache files); recreated by test runs, never committed
+/.vitest/
+
+# Local agent-workflow reports; summarized into HANDOVER.md, never committed
+/.agents/

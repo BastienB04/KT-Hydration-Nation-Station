@@ -176,7 +176,7 @@ The colours the parent pre-sampled (`#9CE460`–`#B4E478` green, `#F04854` coral
 - **Week bars.** `--drop` fill with ink outline (the outline gives 3 : 1 contrast); goal line dashed `--water-strong`; a day that met the goal shows a tiny lily pad or heart, not a colour change alone.
 - **Radii.** 12 px for small chips, 20 px for cards, 28 px for the pond, pill for buttons.
 - **Whitespace.** The frog never touches a card edge (clear space 0.25 W). Hero frog on the Pond screen about 180–220 px wide in the 420 px window.
-- **Motion** (Phase 4): blink, gentle bob, a one-shot celebration; respect `prefers-reduced-motion`.
+- **Motion** (Phase 4): blink, gentle bob, a one-shot celebration, a short Setup wave (raised right arm, two 1.6 s swings, then rest); respect `prefers-reduced-motion`.
 
 ## 8. Sizes and stroke minimums
 

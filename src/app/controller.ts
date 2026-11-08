@@ -65,6 +65,7 @@ export function createController(options: ControllerOptions): Controller {
   let lastRoot = store.getState();
   let lastTooltip: string | null = null;
   let lastAttention: boolean | null = null;
+  let attentionRequest = 0;
   let firing = false;
   let disposed = false;
   let storeUnsub: (() => void) | null = null;
@@ -98,10 +99,13 @@ export function createController(options: ControllerOptions): Controller {
     const due = reminderUnanswered(store.getState().data, now());
     if (due === lastAttention) return;
     lastAttention = due;
+    const request = ++attentionRequest;
     try {
       await platform.tray.setAttention(due);
     } catch {
-      // Tray icon is best-effort.
+      // Tray icon is best-effort. Forget the failed value so the next tick or
+      // state change retries it, unless a newer request has replaced it.
+      if (request === attentionRequest) lastAttention = null;
     }
   }
 
@@ -110,6 +114,8 @@ export function createController(options: ControllerOptions): Controller {
    * update is fire-and-forget so evaluate() holds its `firing` guard no longer
    * than in Phase 3 (a longer hold makes an overlapping tick skip its fire);
    * refreshAttention records the new value synchronously, so dedupe holds.
+   * A failed icon update clears that record only while it is still the latest
+   * request, so the next tick or state change retries it.
    */
   function refreshTray(): Promise<void> {
     void refreshAttention();

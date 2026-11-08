@@ -14,7 +14,7 @@ export function Home() {
 
   return (
     <section className="screen">
-      <Pond data={data} now={now} />
+      <Pond data={data} />
       <QuickAdd hasEntriesToday={hasEntriesToday} />
       <ReminderStatus />
       <TodayList />

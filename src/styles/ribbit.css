@@ -1,5 +1,6 @@
 /* Ribbit and glyph rendering: sizes, the dark sticker edge (STYLE_GUIDE rule
-   11), idle bob and blink, and the reduced-motion fallback. */
+   11), idle bob and blink, the short Setup wave, and the reduced-motion
+   fallback. */
 .ribbit-art,
 .glyph {
   display: inline-block;
@@ -93,6 +94,29 @@
   transform-box: fill-box;
   transform-origin: center;
   animation: ribbit-blink var(--blink-interval) linear infinite;
+}
+
+/* Setup welcome: the raised right arm (and its sticker-edge copy, same
+   class) waves from the shoulder twice, then rests in the drawn pose.
+   Stops within 5 s (WCAG 2.2.2); reduced motion turns it off below. */
+.ribbit-art--animate.ribbit-art--wave .arm-right {
+  transform-box: fill-box;
+  transform-origin: 13% 90%; /* shoulder, about (348, 322) in the 512 box */
+  animation: ribbit-wave 1.6s ease-in-out 0.4s 2 both;
+}
+
+@keyframes ribbit-wave {
+  0%,
+  100% {
+    transform: rotate(0deg);
+  }
+  25%,
+  75% {
+    transform: rotate(10deg); /* hand swings out */
+  }
+  50% {
+    transform: rotate(-8deg); /* hand swings in, behind the head */
+  }
 }
 
 @keyframes ribbit-bob {

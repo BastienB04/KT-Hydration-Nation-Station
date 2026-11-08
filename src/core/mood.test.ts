@@ -68,6 +68,19 @@ describe("pondMood states", () => {
     expect(pondMood(d, at(10, 5))).toBe("waking");
   });
 
+  it("changes with time alone: a pause ending and active hours ending", () => {
+    const paused = dataWith(500, (x) => {
+      x.state.pausedUntil = iso(10);
+    });
+    expect(pondMood(paused, at(9, 59))).toBe("sleeping");
+    expect(pondMood(paused, at(10, 0))).toBe("waking");
+    const waiting = dataWith(500, (x) => {
+      x.state.lastReminderAt = iso(21, 30);
+    });
+    expect(pondMood(waiting, at(21, 50))).toBe("reminder");
+    expect(pondMood(waiting, at(22, 5))).toBe("waking");
+  });
+
   it("ignores a reminder from yesterday", () => {
     const d = dataWith(0, (x) => {
       x.state.lastReminderAt = iso(21, 0, 3);

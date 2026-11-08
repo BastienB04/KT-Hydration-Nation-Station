@@ -10,4 +10,4 @@ Nothing here is imported by Vite, Vitest, Tauri or CI. Vite serves only `index.h
 | `mockups/` | Rendered PNG mockups of the candidate app designs. Direction C plus a dark mode was selected on 7 Nov 2026; see `mockups/MOCKUPS.md`. |
 | `scratch/` | Working files. Git-ignored. |
 | `review/` | Design review reports and gate files from the design workflow. Git-ignored. |
-| `implementation_screenshots/` | Final screenshots of the implemented Phase 4 app: 16 PNGs at 2x (Setup, Pond 48 %/100 %/celebrate, Week, Settings top and bottom, About; light, dark and system-dark; 360×600 and 1024×768), captured from the production build by a git-ignored harness. Committed. |
+| `implementation_screenshots/` | Final screenshots of the implemented Phase 4 app: 26 PNGs at 2x (Setup at rest and mid-wave, Pond 48 %/100 %/celebrate, Week, Settings top and bottom, About; light, dark and system-dark; 1024×768; and 360×600 for Pond, Setup, Week top and bottom, Settings top and bottom in light and dark, and About top and bottom), captured from the production build by a git-ignored harness. Committed. |

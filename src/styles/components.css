@@ -245,15 +245,29 @@
   font-size: 0.875rem;
   font-weight: 700;
   color: var(--text);
+  /* Own stacking context for the selected pill below; clicks still reach the
+     radio (and its pointer cursor) underneath. */
+  position: relative;
+  z-index: 0;
+  pointer-events: none;
 }
 
-/* Selected: its own outlined green pill in a heavier weight (not colour alone). */
+/* Selected: an outlined green pill inset inside the control's border (drawn
+   by ::before inside the span's transparent border), in a heavier weight
+   (not colour alone). */
 .segmented__option input:checked + span {
-  margin: calc(-1 * var(--stroke-control));
-  border-color: var(--line);
-  background: var(--primary);
   color: var(--on-primary);
   font-weight: 900;
+}
+
+.segmented__option input:checked + span::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: inherit;
+  background: var(--primary);
 }
 
 .segmented__option input:focus-visible + span {
