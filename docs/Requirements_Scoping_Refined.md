@@ -401,15 +401,15 @@ await win.onCloseRequested(async (e) => { e.preventDefault(); await win.hide(); 
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "label": "main", "title": "KT-Hydration-Nation-Station", "width": 420, "height": 720, "minWidth": 360, "minHeight": 600 }],
+    "windows": [{ "label": "main", "title": "KT-Hydration-Nation-Station", "width": 420, "height": 720, "minWidth": 360, "minHeight": 600, "center": true, "visible": false }],
     "security": {
-      "csp": "default-src 'self'; img-src 'self' data: asset: http://asset.localhost; media-src 'self' asset: http://asset.localhost; style-src 'self' 'unsafe-inline'"
+      "csp": "default-src 'self'; script-src 'self'; style-src 'self'; font-src 'self'; img-src 'self'; connect-src 'self' ipc: http://ipc.localhost; media-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'; frame-src 'none'"
     }
   },
   "bundle": {
     "active": true,
     "targets": ["nsis"],                       // one artifact for users; add "msi" only if asked
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.icns", "icons/icon.ico"],
     "windows": {
       "webviewInstallMode": { "type": "downloadBootstrapper" },
@@ -420,13 +420,17 @@ await win.onCloseRequested(async (e) => { e.preventDefault(); await win.hide(); 
     "updater": {
       "pubkey": "<contents of ~/.tauri/kt-hns.key.pub>",
       "endpoints": ["https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest/download/latest.json"],
+      "requireSignedVersion": true,
+      "allowDowngrades": false,
       "windows": { "installMode": "passive" }
     }
   }
 }
 ```
 
-`src-tauri/capabilities/default.json` (allow-list; `npm run tauri add <plugin>` adds the `<plugin>:default` entries, the window ones are added by hand; a missing permission shows up as an explicit "not allowed" error in the dev console):
+The public key is configured only after separately approved signing-key setup. Ordinary builds retain `createUpdaterArtifacts: false`; the release workflow adds `tauri.release.conf.json` to enable signed artifacts. HTTPS updater requests run in Rust, outside the webview CSP. The native update check enforces HTTPS, including artifact redirects, and accepts only the matching installer URL in this repository.
+
+`src-tauri/capabilities/default.json` retains the existing main-window permissions. Autostart permissions remain in their separate capability. Do not use broad updater/process defaults: they would allow a stock check to bypass the guarded native check.
 
 ```json
 {
@@ -439,77 +443,56 @@ await win.onCloseRequested(async (e) => { e.preventDefault(); await win.hide(); 
     "core:window:allow-hide",
     "core:window:allow-set-focus",
     "core:window:allow-unminimize",
+    "opener:default",
     "notification:default",
-    "store:default",
-    "autostart:default",
-    "updater:default",
-    "process:default",
-    "opener:default"
+    "store:default"
   ]
 }
 ```
 
-`src-tauri/Cargo.toml`: `tauri = { version = "2", features = ["tray-icon", "image-png"] }` plus the plugin crates added by the CLI.
+`src-tauri/capabilities/updates.json` grants only these actions to the main Windows window:
 
-Versioning: `version` in `tauri.conf.json` is the single source of truth for the installer and updater. Keep `package.json` in sync for tidiness.
+```json
+{
+  "$schema": "../gen/schemas/desktop-schema.json",
+  "identifier": "windows-updates",
+  "windows": ["main"],
+  "platforms": ["windows"],
+  "permissions": ["updater:allow-download", "updater:allow-install", "process:allow-restart"]
+}
+```
+
+`src-tauri/Cargo.toml`: `tauri = { version = "2", features = ["tray-icon", "image-png"] }` plus the plugin crates. Phase 6 updater/process versions are pinned to 2.14.1 / 2.4.0 in both Rust and npm; they require Rust 1.90+ and Tauri 2.12.
+
+Versioning: `tauri.conf.json`, `package.json`, npm lockfile, Cargo manifest and Cargo lockfile must agree. The release gate also requires an exact `v<version>` tag. About reads the package version rather than a hard-coded string.
 
 ### 4.9 Build and release pipeline
 
-Signing keys for the updater (one-time, on the Mac):
+Signing-key generation requires separate explicit approval. After that approval, run the installed CLI from a normal Mac terminal with a restrictive umask and hidden, nonempty password prompts:
 
 ```bash
-npm run tauri signer generate -- -w ~/.tauri/kt-hns.key
-# → ~/.tauri/kt-hns.key (PRIVATE, back up to a password manager, never commit)
-# → ~/.tauri/kt-hns.key.pub (goes into tauri.conf.json "pubkey")
+umask 077
+mkdir -p "$HOME/.tauri"
+env -u CI ./node_modules/.bin/tauri signer generate --write-keys "$HOME/.tauri/kt-hns.key"
 ```
 
-GitHub repo → Settings → Secrets and variables → Actions: `TAURI_SIGNING_PRIVATE_KEY` (file contents) and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. Settings → Actions → Workflow permissions: "Read and write" (needed to create releases).
+Back up the private key and password in a password manager. Never display the private key or place it in source, logs, screenshots or Git. Copy only the public `.key.pub` contents into `tauri.conf.json`.
 
-`.github/workflows/release.yml`:
+Adding GitHub Actions secrets is a separate external approval: `TAURI_SIGNING_PRIVATE_KEY` and `TAURI_SIGNING_PRIVATE_KEY_PASSWORD`. The workflow scopes `contents: write` to its publication job; do not widen repository-wide Actions permissions as a setup step.
 
-```yaml
-name: release
-on:
-  push:
-    tags: ['v*']
-  workflow_dispatch:
+The maintained [release workflow](../.github/workflows/release.yml) triggers only on explicit version tags in the canonical repository. It uses immutable action revisions, builds Windows x64 NSIS with updater signing, verifies installer bytes and the protected version comment against the configured public key, prepares exact metadata/checksums, and re-verifies transferred assets before publication. It refuses an existing release or a latest-version rollback and verifies anonymous downloads afterward. Reviewed release notes come from `docs/releases/<tag>.md`.
 
-jobs:
-  windows:
-    runs-on: windows-latest
-    permissions:
-      contents: write
-    steps:
-      - uses: actions/checkout@v7
-      - uses: actions/setup-node@v6
-        with: { node-version: lts/*, cache: npm }
-      - uses: dtolnay/rust-toolchain@stable
-      - uses: swatinem/rust-cache@v2
-        with: { workspaces: './src-tauri -> target' }
-      - run: npm ci
-      - uses: tauri-apps/tauri-action@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
-          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
-        with:
-          tagName: v__VERSION__            # action substitutes the app version
-          releaseName: 'KT-Hydration-Nation-Station v__VERSION__'
-          releaseBody: 'Download the *-setup.exe below. Windows will show a SmartScreen warning once: More info → Run anyway.'
-          releaseDraft: false
-          prerelease: false
-          updaterJsonPreferNsis: true
-```
+The [build-check workflow](../.github/workflows/build-check.yml) validates ordinary source pushes and produces an unsigned installer artifact for Windows testing. It does not use signing secrets or create a public Release.
 
-`.github/workflows/build-check.yml`: same steps on `push` to `main`, but **without** `tagName`/`releaseName` and with `uploadWorkflowArtifacts: true`, so every push produces a downloadable installer under the Actions run (used for VM testing without making a release). Windows runner minutes are unlimited on a public repo.
+Public assets are the versioned installer, its `.exe.sig`, an identical stable `KT-Hydration-Nation-Station-setup.exe` download alias, `latest.json` and `SHA256SUMS.txt`. The updater uses the versioned filename; the README uses the stable alias.
 
-Optional, for a never-changing download link in the README (`…/releases/latest/download/KT-Hydration-Nation-Station-setup.exe`): set `releaseAssetNamePattern: '[name][setup][ext]'`. Verify the updater still finds the asset after enabling it; otherwise link to the Releases page, which is also fine for two users.
-
-Release procedure: bump `version` in `tauri.conf.json` and `package.json` → commit → `git tag v0.1.1` → `git push && git push --tags` → wait ~8 min → Release appears with the installer, `.sig`, and `latest.json`.
+Build, test and review locally first. Source push, tag creation/push, secrets/settings and public publication each require explicit approval. Pushing a version tag starts automatic publication, so approval of that trigger must cover publication too. Follow [Release and Recovery](Release_and_Recovery.md) for the concrete gates, expected assets and recovery steps.
 
 ### 4.10 Auto-update flow
 
-On launch and every 6 h, the frontend calls `check()`; if an update exists it shows a frog bubble "A fresher Ribbit is available" with "Update now" → `downloadAndInstall()` → `relaunch()`. On Windows the app quits itself before the installer runs (documented limitation); state is saved first. `installMode: passive` shows a small progress bar and needs no clicks. Losing the private key means no further updates can be delivered to installed copies; hence the password-manager backup.
+With the existing preference enabled, the frontend checks at launch and every six hours using timestamps and tick/wake events. About also supports manual checks. An available update offers Download update, then Restart now / Later after signature verification finishes. Transfer completion alone does not permit installation. Later hides the notice and retains a verified download for the current session; periodic checks still discover a newer repair release.
+
+Restart now freezes mutations, finishes in-flight settings operations and saves hydration data before the passive Windows installer starts. Save failure prevents installation; download/signature or installer-launch failure keeps the existing app usable. Windows exits after successful installer launch; the installer restarts it. A relaunch fallback reports recovery instructions if needed. Losing the private key prevents trusted updates to existing installations; a replacement key requires a manually installed release.
 
 ### 4.11 Testing strategy on the Mac (how you "see how it looks")
 
@@ -525,7 +508,7 @@ VM setup (once, ~1–2 h mostly download time): `brew install --cask utm` (or VM
 ### 4.12 Security and privacy
 
 - Local-only data, no telemetry, no remote content; CSP restricts the webview to bundled assets.
-- Plugin surface limited by `capabilities/default.json` (least privilege).
+- Plugin surface limited by the main-window and platform-specific capability files; update checking goes through the native HTTPS guard.
 - Updates verified against the public key compiled into the app; private key in GitHub Secrets + password manager only; `.gitignore` excludes `*.key`.
 - The app never runs elevated (per-user install, passive updater).
 - SmartScreen warning is the honest cost of not buying a certificate; it's documented for the user instead of hidden.

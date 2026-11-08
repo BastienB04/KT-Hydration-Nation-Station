@@ -1,0 +1,147 @@
+# A version tag starts publication. Push it only after explicit approval of
+# the source, tag, signing setup and public release. Ordinary pushes never release.
+name: release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: windows-public-release
+  cancel-in-progress: false
+
+env:
+  RELEASE_TAG: ${{ github.ref_name }}
+
+jobs:
+  build-windows:
+    if: github.repository == 'BastienB04/KT-Hydration-Nation-Station' && github.ref_type == 'tag'
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Require a tag from main
+        shell: pwsh
+        run: |
+          git merge-base --is-ancestor HEAD origin/main
+          if ($LASTEXITCODE -ne 0) { throw "The release tag must identify a commit on main." }
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22.23.2"
+          package-manager-cache: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: "1.98.0"
+          components: rustfmt, clippy
+          targets: x86_64-pc-windows-msvc
+
+      - uses: swatinem/rust-cache@d1527c8f67ef9af357290475d4af4b0fab8f12e0 # v2
+        with:
+          workspaces: |
+            src-tauri -> target
+            scripts/verify-update -> target
+
+      - run: npm ci --no-fund
+      - name: Validate version, public key, CSP and capabilities
+        run: node scripts/release.mjs preflight
+      - run: npm test -- --run
+      - run: npm run test:release
+      - run: npm run build
+      - run: npm audit --audit-level=low
+      - run: cargo fmt --manifest-path src-tauri/Cargo.toml -- --check
+      - run: cargo clippy --locked --manifest-path src-tauri/Cargo.toml --all-targets --all-features -- -D warnings
+      - run: cargo test --locked --manifest-path src-tauri/Cargo.toml
+      - run: cargo fmt --manifest-path scripts/verify-update/Cargo.toml -- --check
+      - run: cargo clippy --locked --manifest-path scripts/verify-update/Cargo.toml --all-targets -- -D warnings
+      - run: cargo test --locked --manifest-path scripts/verify-update/Cargo.toml
+
+      - name: Build updater-signed Windows x64 installer
+        uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.TAURI_SIGNING_PRIVATE_KEY_PASSWORD }}
+        with:
+          args: --target x86_64-pc-windows-msvc --bundles nsis --config src-tauri/tauri.release.conf.json
+          uploadUpdaterJson: false
+          uploadWorkflowArtifacts: false
+
+      - name: Authenticate installer and prepare exact public assets
+        run: node scripts/release.mjs prepare
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: windows-release-assets
+          path: release-assets/*
+          if-no-files-found: error
+          compression-level: 0
+          retention-days: 14
+          overwrite: false
+          include-hidden-files: false
+
+  publish:
+    needs: build-windows
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    env:
+      RELEASE_COMMIT: ${{ github.sha }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@249970729cb0ef3589644e2896645e5dc5ba9c38 # v6
+        with:
+          node-version: "22.23.2"
+          package-manager-cache: false
+
+      - uses: dtolnay/rust-toolchain@683b588c487a69d01f6c6ddf40f036ff682cc2c8 # master
+        with:
+          toolchain: "1.98.0"
+
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: windows-release-assets
+          path: release-assets
+          digest-mismatch: error
+
+      - name: Verify transferred artifacts before publication
+        run: node scripts/release.mjs verify
+
+      - name: Verify public repository, immutable tag and latest-version order
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/release.mjs publication-check
+
+      - name: Create the approved release (never replace existing assets)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: BastienB04/KT-Hydration-Nation-Station
+        run: |
+          VERSION="${RELEASE_TAG#v}"
+          INSTALLER="KT-Hydration-Nation-Station_${VERSION}_x64-setup.exe"
+          gh release create "$RELEASE_TAG" \
+            "release-assets/$INSTALLER" \
+            "release-assets/$INSTALLER.sig" \
+            "release-assets/KT-Hydration-Nation-Station-setup.exe" \
+            "release-assets/latest.json" \
+            "release-assets/SHA256SUMS.txt" \
+            --verify-tag --target "$RELEASE_COMMIT" --latest \
+            --title "KT-Hydration-Nation-Station $RELEASE_TAG" \
+            --notes-file release-assets/release-body.md
+
+      - name: Verify public downloads without authentication
+        run: node scripts/release.mjs verify-public

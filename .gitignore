@@ -41,3 +41,7 @@ dist-ssr
 
 # Local agent-workflow reports; summarized into HANDOVER.md, never committed
 /.agents/
+
+# Standalone release verifier build output
+/scripts/verify-update/target/
+/release-assets/
