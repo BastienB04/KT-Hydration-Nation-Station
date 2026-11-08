@@ -1,0 +1,154 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="1740" viewBox="0 0 1200 1740">
+<!-- Ribbit sticker palette. Original work for KT-Hydration-Nation-Station; colours measured from third-party style references, no reference artwork included. -->
+<rect x="0" y="0" width="1200" height="1740" fill="#FFFFFF"/>
+<text x="45" y="62" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="40" font-weight="bold" fill="#141414" text-anchor="start">Ribbit sticker palette</text>
+<text x="45" y="92" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="17" font-weight="normal" fill="#5B635E" text-anchor="start">KT-Hydration-Nation-Station · Phase 4 style guide · original work, style only</text>
+<text x="45" y="134" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#1F6F5B" text-anchor="start">Light · character</text>
+<rect x="45" y="152" width="160" height="96" rx="18" fill="#A6EC66" stroke="#141414" stroke-width="4"/>
+<text x="47" y="274" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">ribbit-green</text>
+<text x="47" y="296" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#A6EC66</text>
+<text x="47" y="316" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">frog body</text>
+<rect x="235" y="152" width="160" height="96" rx="18" fill="#D3ECB4" stroke="#141414" stroke-width="4"/>
+<text x="237" y="274" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">ribbit-parched</text>
+<text x="237" y="296" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#D3ECB4</text>
+<text x="237" y="316" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">body, parched state</text>
+<rect x="425" y="152" width="160" height="96" rx="18" fill="#141414" stroke="#141414" stroke-width="4"/>
+<text x="427" y="274" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">ink</text>
+<text x="427" y="296" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#141414</text>
+<text x="427" y="316" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">outline, eyes, mouth, text</text>
+<rect x="615" y="152" width="160" height="96" rx="18" fill="#FFFFFF" stroke="#141414" stroke-width="4"/>
+<text x="617" y="274" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">glint</text>
+<text x="617" y="296" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FFFFFF</text>
+<text x="617" y="316" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">eye glint</text>
+<rect x="805" y="152" width="160" height="96" rx="18" fill="#FFB0C8" stroke="#141414" stroke-width="4"/>
+<text x="807" y="274" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">blush</text>
+<text x="807" y="296" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FFB0C8</text>
+<text x="807" y="316" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">cheeks (happy+ only)</text>
+<text x="45" y="364" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#1F6F5B" text-anchor="start">Light · water &amp; celebration</text>
+<rect x="45" y="382" width="160" height="96" rx="18" fill="#7CCCF2" stroke="#141414" stroke-width="4"/>
+<text x="47" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">drop</text>
+<text x="47" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#7CCCF2</text>
+<text x="47" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">water drop / glass fill</text>
+<rect x="235" y="382" width="160" height="96" rx="18" fill="#CBEBFB" stroke="#141414" stroke-width="4"/>
+<text x="237" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">pond</text>
+<text x="237" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#CBEBFB</text>
+<text x="237" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">pond level fill</text>
+<rect x="425" y="382" width="160" height="96" rx="18" fill="#1C6FA3" stroke="#141414" stroke-width="4"/>
+<text x="427" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">water-strong</text>
+<text x="427" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#1C6FA3</text>
+<text x="427" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">blue text, chart goal</text>
+<rect x="615" y="382" width="160" height="96" rx="18" fill="#FF6CA8" stroke="#141414" stroke-width="4"/>
+<text x="617" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">heart</text>
+<text x="617" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FF6CA8</text>
+<text x="617" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">celebration heart</text>
+<rect x="805" y="382" width="160" height="96" rx="18" fill="#F4505E" stroke="#141414" stroke-width="4"/>
+<text x="807" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">heart-coral</text>
+<text x="807" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#F4505E</text>
+<text x="807" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">alt. heart accent</text>
+<rect x="995" y="382" width="160" height="96" rx="18" fill="#FFD54A" stroke="#141414" stroke-width="4"/>
+<text x="997" y="504" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">crown</text>
+<text x="997" y="526" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FFD54A</text>
+<text x="997" y="546" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">crown, sparkles</text>
+<text x="45" y="594" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#1F6F5B" text-anchor="start">Light · interface</text>
+<rect x="45" y="612" width="160" height="96" rx="18" fill="#FFFFFF" stroke="#141414" stroke-width="4"/>
+<text x="47" y="734" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">paper</text>
+<text x="47" y="756" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FFFFFF</text>
+<text x="47" y="776" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">app background</text>
+<rect x="235" y="612" width="160" height="96" rx="18" fill="#FFF9E5" stroke="#141414" stroke-width="4"/>
+<text x="237" y="734" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">cream</text>
+<text x="237" y="756" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#FFF9E5</text>
+<text x="237" y="776" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">tip card, inset panels</text>
+<rect x="425" y="612" width="160" height="96" rx="18" fill="#5B635E" stroke="#141414" stroke-width="4"/>
+<text x="427" y="734" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">ink-muted</text>
+<text x="427" y="756" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#5B635E</text>
+<text x="427" y="776" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">secondary text</text>
+<rect x="615" y="612" width="160" height="96" rx="18" fill="#1F6F5B" stroke="#141414" stroke-width="4"/>
+<text x="617" y="734" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">deep-pond</text>
+<text x="617" y="756" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#1F6F5B</text>
+<text x="617" y="776" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">links, focus ring</text>
+<rect x="805" y="612" width="160" height="96" rx="18" fill="#C0303C" stroke="#141414" stroke-width="4"/>
+<text x="807" y="734" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#141414" text-anchor="start">danger</text>
+<text x="807" y="756" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#141414" text-anchor="start">#C0303C</text>
+<text x="807" y="776" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="start">destructive text</text>
+<rect x="45" y="824" width="1110" height="184" rx="28" fill="#FFF9E5" stroke="#141414" stroke-width="3"/>
+<text x="69" y="858" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#5B635E" text-anchor="start">Light demo: ink outline on every filled shape, no gradients, no shadows</text>
+<g transform="translate(125,929) scale(0.9)"><path d="M0,-50 C18,-24 34,-6 34,14 A34,34 0 0 1 -34,14 C-34,-6 -18,-24 0,-50 Z" fill="#7CCCF2" stroke="#141414" stroke-width="7" stroke-linejoin="round"/></g>
+<rect x="215" y="901" width="170" height="56" rx="28" fill="#A6EC66" stroke="#141414" stroke-width="3"/>
+<text x="300" y="937" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#141414" text-anchor="middle">+250 ml</text>
+<clipPath id="g1"><rect x="415" y="889" width="150" height="80" rx="20"/></clipPath>
+<rect x="415" y="889" width="150" height="80" rx="20" fill="#FFFFFF"/>
+<rect x="415" y="927" width="150" height="42" fill="#CBEBFB" clip-path="url(#g1)"/>
+<path d="M415,927 H565" stroke="#1C6FA3" stroke-width="3"/>
+<rect x="415" y="889" width="150" height="80" rx="20" fill="none" stroke="#141414" stroke-width="3"/>
+<rect x="605" y="889" width="120" height="80" rx="34" fill="#A6EC66" stroke="#141414" stroke-width="8"/>
+<text x="665" y="989" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#5B635E" text-anchor="middle">120 px → 8 px ink</text>
+<path transform="translate(780,899)" d="M30,58 C10,44 0,32 0,18 C0,6 9,0 17,0 C24,0 28,4 30,9 C32,4 36,0 43,0 C51,0 60,6 60,18 C60,32 50,44 30,58 Z" fill="#FF6CA8" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+<path transform="translate(875,903)" d="M0,44 L4,6 L20,24 L32,0 L44,24 L60,6 L64,44 Z" fill="#FFD54A" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+<text x="957" y="937" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="20" font-weight="bold" fill="#141414" text-anchor="start">1,250 / 2,000 ml</text>
+<rect x="0" y="1038" width="1200" height="2000" fill="#0F2E2A"/>
+<text x="45" y="1084" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#A8E69A" text-anchor="start">Dark · night pond (frog keeps its ink outline and gains a sticker edge)</text>
+<rect x="45" y="1106" width="160" height="96" rx="18" fill="#0F2E2A" stroke="#F3F8F1" stroke-width="4"/>
+<text x="47" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">bg</text>
+<text x="47" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#0F2E2A</text>
+<text x="47" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">Dark Pond background</text>
+<rect x="235" y="1106" width="160" height="96" rx="18" fill="#18423B" stroke="#F3F8F1" stroke-width="4"/>
+<text x="237" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">surface</text>
+<text x="237" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#18423B</text>
+<text x="237" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">cards</text>
+<rect x="425" y="1106" width="160" height="96" rx="18" fill="#F3F8F1" stroke="#F3F8F1" stroke-width="4"/>
+<text x="427" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">text</text>
+<text x="427" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#F3F8F1</text>
+<text x="427" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">text, sticker edge</text>
+<rect x="615" y="1106" width="160" height="96" rx="18" fill="#A9C3B7" stroke="#F3F8F1" stroke-width="4"/>
+<text x="617" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">text-muted</text>
+<text x="617" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#A9C3B7</text>
+<text x="617" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">secondary text</text>
+<rect x="805" y="1106" width="160" height="96" rx="18" fill="#A8E69A" stroke="#F3F8F1" stroke-width="4"/>
+<text x="807" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">accent</text>
+<text x="807" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#A8E69A</text>
+<text x="807" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">links, focus ring</text>
+<rect x="995" y="1106" width="160" height="96" rx="18" fill="#7FA59A" stroke="#F3F8F1" stroke-width="4"/>
+<text x="997" y="1228" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">ui-line</text>
+<text x="997" y="1250" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#7FA59A</text>
+<text x="997" y="1270" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">input / card borders</text>
+<rect x="45" y="1314" width="160" height="96" rx="18" fill="#A6EC66" stroke="#F3F8F1" stroke-width="4"/>
+<text x="47" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">ribbit-green</text>
+<text x="47" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#A6EC66</text>
+<text x="47" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">frog body (same)</text>
+<rect x="235" y="1314" width="160" height="96" rx="18" fill="#141414" stroke="#F3F8F1" stroke-width="4"/>
+<text x="237" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">ink</text>
+<text x="237" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#141414</text>
+<text x="237" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">frog outline (same)</text>
+<rect x="425" y="1314" width="160" height="96" rx="18" fill="#7CCCF2" stroke="#F3F8F1" stroke-width="4"/>
+<text x="427" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">drop</text>
+<text x="427" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#7CCCF2</text>
+<text x="427" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">drop fill (same)</text>
+<rect x="615" y="1314" width="160" height="96" rx="18" fill="#1D5670" stroke="#F3F8F1" stroke-width="4"/>
+<text x="617" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">pond</text>
+<text x="617" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#1D5670</text>
+<text x="617" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">pond level fill</text>
+<rect x="805" y="1314" width="160" height="96" rx="18" fill="#8FD6FF" stroke="#F3F8F1" stroke-width="4"/>
+<text x="807" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">water-strong</text>
+<text x="807" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#8FD6FF</text>
+<text x="807" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">blue text on dark</text>
+<rect x="995" y="1314" width="160" height="96" rx="18" fill="#FF7DB3" stroke="#F3F8F1" stroke-width="4"/>
+<text x="997" y="1436" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="18" font-weight="bold" fill="#F3F8F1" text-anchor="start">heart</text>
+<text x="997" y="1458" font-family="Menlo, monospace" font-size="16" font-weight="normal" fill="#F3F8F1" text-anchor="start">#FF7DB3</text>
+<text x="997" y="1478" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="start">celebration heart</text>
+<rect x="45" y="1526" width="1110" height="184" rx="28" fill="#18423B"/>
+<text x="69" y="1560" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="16" font-weight="normal" fill="#A9C3B7" text-anchor="start">Dark demo: characters get a text-colour sticker edge outside the ink line; UI controls drop the ink border</text>
+<g transform="translate(125,1631) scale(0.9)"><path d="M0,-50 C18,-24 34,-6 34,14 A34,34 0 0 1 -34,14 C-34,-6 -18,-24 0,-50 Z" fill="none" stroke="#F3F8F1" stroke-width="21" stroke-linejoin="round"/><path d="M0,-50 C18,-24 34,-6 34,14 A34,34 0 0 1 -34,14 C-34,-6 -18,-24 0,-50 Z" fill="#7CCCF2" stroke="#141414" stroke-width="7" stroke-linejoin="round"/></g>
+<rect x="215" y="1603" width="170" height="56" rx="28" fill="#A6EC66"/>
+<text x="300" y="1639" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="22" font-weight="bold" fill="#141414" text-anchor="middle">+250 ml</text>
+<clipPath id="g2"><rect x="415" y="1591" width="150" height="80" rx="20"/></clipPath>
+<rect x="415" y="1591" width="150" height="80" rx="20" fill="#0F2E2A"/>
+<rect x="415" y="1629" width="150" height="42" fill="#1D5670" clip-path="url(#g2)"/>
+<path d="M415,1629 H565" stroke="#8FD6FF" stroke-width="3"/>
+<rect x="415" y="1591" width="150" height="80" rx="20" fill="none" stroke="#7FA59A" stroke-width="2"/>
+<rect x="605" y="1591" width="120" height="80" rx="34" fill="none" stroke="#F3F8F1" stroke-width="20"/>
+<rect x="605" y="1591" width="120" height="80" rx="34" fill="#A6EC66" stroke="#141414" stroke-width="8"/>
+<text x="665" y="1691" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="13" font-weight="normal" fill="#A9C3B7" text-anchor="middle">ink 8 px + edge 6 px</text>
+<path transform="translate(780,1601)" d="M30,58 C10,44 0,32 0,18 C0,6 9,0 17,0 C24,0 28,4 30,9 C32,4 36,0 43,0 C51,0 60,6 60,18 C60,32 50,44 30,58 Z" fill="none" stroke="#F3F8F1" stroke-width="15" stroke-linejoin="round"/><path transform="translate(780,1601)" d="M30,58 C10,44 0,32 0,18 C0,6 9,0 17,0 C24,0 28,4 30,9 C32,4 36,0 43,0 C51,0 60,6 60,18 C60,32 50,44 30,58 Z" fill="#FF7DB3" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+<path transform="translate(875,1605)" d="M0,44 L4,6 L20,24 L32,0 L44,24 L60,6 L64,44 Z" fill="none" stroke="#F3F8F1" stroke-width="15" stroke-linejoin="round"/><path transform="translate(875,1605)" d="M0,44 L4,6 L20,24 L32,0 L44,24 L60,6 L64,44 Z" fill="#FFD54A" stroke="#141414" stroke-width="5" stroke-linejoin="round"/>
+<text x="957" y="1639" font-family="'Arial Rounded MT Bold', 'Nunito', 'Helvetica Neue', sans-serif" font-size="20" font-weight="bold" fill="#F3F8F1" text-anchor="start">1,250 / 2,000 ml</text>
+</svg>

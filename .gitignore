@@ -30,3 +30,8 @@ dist-ssr
 
 # Local continuation record; symlinked to ~/kiro-scratch and never committed
 /HANDOVER.md
+
+# Design workspace: third-party reference images and working files stay local
+/frog_graphic_art_theme/basis_raw/
+/frog_graphic_art_theme/scratch/
+/frog_graphic_art_theme/review/
