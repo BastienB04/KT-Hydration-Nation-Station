@@ -6,6 +6,7 @@
 import type { PersistedData } from "../core/schema";
 import { createMemoryPersistence } from "./memory";
 import { createWebAudioSound } from "./sound";
+import { createUnavailableUpdater } from "./noUpdater";
 import type { Platform, Persistence } from "./types";
 
 const STORE_KEY = "kt-hns:store";
@@ -80,6 +81,7 @@ export function createBrowserPlatform(): Platform & { dispose(): void } {
       },
     },
     sound,
+    updater: createUnavailableUpdater(),
     autostart: {
       supported: false,
       async isEnabled() {

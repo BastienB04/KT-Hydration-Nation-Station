@@ -2,8 +2,9 @@
 import { PeekHeader } from "../components/PeekHeader";
 import { Ribbit } from "../components/Ribbit";
 import { FLUID_DISCLAIMER } from "../core/tips";
+import { APP_VERSION } from "../core/version";
+import { UpdatePanel } from "../components/UpdatePanel";
 
-export const APP_VERSION = "0.1.0";
 /** Copyright line of public/licenses/Nunito-OFL.txt. */
 const NUNITO_COPYRIGHT = "Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)";
 
@@ -22,6 +23,8 @@ export function About() {
         <p>A cartoon frog that reminds you to drink water.</p>
         <p className="about-card__note">{FLUID_DISCLAIMER}</p>
       </section>
+
+      <UpdatePanel />
 
       <section className="card about-card" aria-labelledby="about-credits">
         <h3 id="about-credits" className="card__title">

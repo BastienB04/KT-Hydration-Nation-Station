@@ -268,7 +268,7 @@ export function Settings() {
               Check for updates
               <span className="field__hint setting-row__hint">
                 {" "}
-                (update checks arrive in a later version; your choice is saved for then)
+            Check on launch and every six hours in the Windows app. Updates install when you choose.
               </span>
             </label>
             <input

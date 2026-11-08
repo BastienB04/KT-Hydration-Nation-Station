@@ -15,6 +15,7 @@ import {
 import { disable, enable, isEnabled } from "@tauri-apps/plugin-autostart";
 import type { PersistedData } from "../core/schema";
 import { createWebAudioSound } from "./sound";
+import { createTauriUpdater } from "./tauriUpdater";
 import type { Platform } from "./types";
 
 const STORE_FILE = "store.json";
@@ -40,7 +41,8 @@ export async function installCloseToTray(): Promise<() => void> {
   });
 }
 
-export function createTauriPlatform(): Platform & { dispose(): void } {
+export async function createTauriPlatform(): Promise<Platform & { dispose(): void }> {
+  const updater = await createTauriUpdater();
   const sound = createWebAudioSound();
   let storePromise: Promise<Store> | null = null;
   let permissionDenied = false;
@@ -86,6 +88,7 @@ export function createTauriPlatform(): Platform & { dispose(): void } {
       },
     },
     sound,
+    updater,
     autostart: {
       supported: true,
       isEnabled,

@@ -1058,3 +1058,33 @@
   color: var(--text-muted);
   font-size: 0.8rem;
 }
+
+/* ---------- Updates ---------- */
+.update-card {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  line-height: 1.35;
+  font-weight: 700;
+}
+
+.update-card--notice {
+  margin-bottom: 16px;
+}
+
+.update-card__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.update-card__progress {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.update-card progress {
+  width: 100%;
+  accent-color: var(--primary);
+}

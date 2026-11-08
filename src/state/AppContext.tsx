@@ -4,6 +4,7 @@
  */
 import { createContext, useContext, useSyncExternalStore, type ReactNode } from "react";
 import type { Controller } from "../app/controller";
+import type { UpdateManager } from "../app/updates";
 import type { AppStore } from "./store";
 import type { RootState } from "./reducer";
 import { uiClock } from "./uiClock";
@@ -11,6 +12,7 @@ import { uiClock } from "./uiClock";
 interface AppContextValue {
   store: AppStore;
   controller: Controller;
+  updates: UpdateManager;
   platformKind: "tauri" | "browser";
 }
 
@@ -19,11 +21,12 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({
   store,
   controller,
+  updates,
   platformKind,
   children,
 }: AppContextValue & { children: ReactNode }) {
   return (
-    <AppContext.Provider value={{ store, controller, platformKind }}>{children}</AppContext.Provider>
+    <AppContext.Provider value={{ store, controller, updates, platformKind }}>{children}</AppContext.Provider>
   );
 }
 
@@ -48,6 +51,12 @@ export function useController(): Controller {
 
 export function usePlatformKind(): "tauri" | "browser" {
   return useAppContext().platformKind;
+}
+
+export function useUpdates() {
+  const { updates } = useAppContext();
+  const state = useSyncExternalStore(updates.subscribe, updates.getState);
+  return { updates, state };
 }
 /**
  * Re-render the calling component on the shared 30-second UI clock, for

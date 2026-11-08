@@ -15,11 +15,15 @@ import type { Platform } from "../platform/types";
 import { createSaveQueue } from "./saveQueue";
 import type { AppStore } from "../state/store";
 
+const UPDATE_SAVE_TIMEOUT_MS = 15_000;
+
 export interface Controller {
   start(): Promise<void>;
   dispose(): void;
   /** Schedule a save of the current state (used when load migrated the data). */
   persist(): void;
+  /** Save current data before an update and hold mutations until released. */
+  prepareUpdate(): Promise<() => void>;
   evaluate(): Promise<void>;
   /**
    * Subscribe to reminder-notification clicks (relayed from the platform once
@@ -68,9 +72,20 @@ export function createController(options: ControllerOptions): Controller {
   let attentionRequest = 0;
   let firing = false;
   let disposed = false;
+  let installing = false;
+  const pendingOperations = new Set<Promise<unknown>>();
   let storeUnsub: (() => void) | null = null;
   const unlisteners: Array<() => void> = [];
   const notificationOpenCbs = new Set<() => void>();
+
+  function trackOperation<T>(operation: Promise<T>): Promise<T> {
+    pendingOperations.add(operation);
+    void operation.then(
+      () => pendingOperations.delete(operation),
+      () => pendingOperations.delete(operation),
+    );
+    return operation;
+  }
 
   function relayNotificationOpen(): void {
     if (disposed) return;
@@ -154,7 +169,7 @@ export function createController(options: ControllerOptions): Controller {
   }
 
   async function evaluate(): Promise<void> {
-    if (firing) return;
+    if (firing || installing || disposed) return;
     firing = true;
     try {
       const decision = schedulerEvaluate(store.getState().data, now());
@@ -219,6 +234,36 @@ export function createController(options: ControllerOptions): Controller {
       saveQueue.schedule(store.getState().data);
     },
 
+    async prepareUpdate() {
+      if (disposed || installing) throw new Error("The app cannot start another update.");
+      installing = true;
+      let waitTimer: ReturnType<typeof setTimeout> | undefined;
+      try {
+        // Finish in-flight settings/autostart/setup operations before the final
+        // save; they may still need to reconcile OS state.
+        const save = (async () => {
+          await Promise.allSettled([...pendingOperations]);
+          saveQueue.schedule(store.getState().data);
+          await saveQueue.flush();
+        })();
+        await Promise.race([
+          save,
+          new Promise<never>((_, reject) => {
+            waitTimer = setTimeout(() => reject(new Error("Saving took too long.")), UPDATE_SAVE_TIMEOUT_MS);
+          }),
+        ]);
+        if (disposed || store.getState().ui.saveError !== null) {
+          throw new Error("The latest hydration data could not be saved.");
+        }
+        return () => { installing = false; };
+      } catch (error) {
+        installing = false;
+        throw error;
+      } finally {
+        clearTimeout(waitTimer);
+      }
+    },
+
     evaluate,
 
     onNotificationOpen(cb) {
@@ -229,81 +274,100 @@ export function createController(options: ControllerOptions): Controller {
     },
 
     logDrink(ml: number): boolean {
+      if (installing || disposed) return false;
       const before = store.getState();
       store.dispatch({ type: "logDrink", ml, now: now() });
       return store.getState() !== before;
     },
 
     undoLast() {
+      if (installing || disposed) return;
       store.dispatch({ type: "undoLast", now: now() });
     },
 
     editEntry(key, index, t, ml) {
+      if (installing || disposed) return;
       store.dispatch({ type: "editEntry", key, index, t, ml });
     },
 
     deleteEntry(key, index, t) {
+      if (installing || disposed) return;
       store.dispatch({ type: "deleteEntry", key, index, t });
     },
 
     snooze() {
+      if (installing || disposed) return;
       store.dispatch({ type: "snooze", now: now() });
     },
 
     pauseFor(minutes: number) {
+      if (installing || disposed) return;
       store.dispatch({ type: "pauseUntil", until: now() + minutes * 60_000 });
     },
 
     pauseRestOfDay() {
+      if (installing || disposed) return;
       store.dispatch({ type: "pauseUntil", until: restOfDayUntil(store.getState().data.settings, now()) });
     },
 
     resume() {
+      if (installing || disposed) return;
       store.dispatch({ type: "resume" });
     },
 
     nextTip() {
+      if (installing || disposed) return;
       store.dispatch({ type: "nextTip" });
     },
 
     setTheme(mode: ThemeMode) {
+      if (installing || disposed) return;
       store.dispatch({ type: "setTheme", theme: mode });
     },
-    async saveSettings(settings: Omit<Settings, "theme">) {
-      const prev = store.getState().data.settings;
-      store.dispatch({
-        type: "updateSettings",
-        settings: { ...settings, theme: store.getState().data.settings.theme },
-      });
-      if (platform.autostart.supported && settings.launchAtLogin !== prev.launchAtLogin) {
-        try {
-          await platform.autostart.setEnabled(settings.launchAtLogin);
-        } catch {
-          store.dispatch({
-            type: "updateSettings",
-            settings: { ...store.getState().data.settings, launchAtLogin: prev.launchAtLogin },
-          });
-          return { ok: false, error: "Saved, but couldn't change launch at login." };
-        }
+    saveSettings(settings: Omit<Settings, "theme">) {
+      if (installing || disposed) {
+        return Promise.resolve({ ok: false as const, error: "An update is starting. Try again later." });
       }
-      return { ok: true };
+      return trackOperation((async () => {
+        const prev = store.getState().data.settings;
+        store.dispatch({
+          type: "updateSettings",
+          settings: { ...settings, theme: store.getState().data.settings.theme },
+        });
+        if (platform.autostart.supported && settings.launchAtLogin !== prev.launchAtLogin) {
+          try {
+            await platform.autostart.setEnabled(settings.launchAtLogin);
+          } catch {
+            store.dispatch({
+              type: "updateSettings",
+              settings: { ...store.getState().data.settings, launchAtLogin: prev.launchAtLogin },
+            });
+            return { ok: false as const, error: "Saved, but couldn't change launch at login." };
+          }
+        }
+        return { ok: true as const };
+      })());
     },
 
-    async completeSetup(values) {
-      store.dispatch({ type: "completeSetup", ...values });
-      const granted = await platform.notifier.ensurePermission();
-      store.dispatch({ type: "setNotificationsBlocked", blocked: !granted });
-      const { settings } = store.getState().data;
-      if (applyAutostartOnSetup && platform.autostart.supported && settings.launchAtLogin) {
-        try {
-          await platform.autostart.setEnabled(true);
-        } catch (error) {
-          console.warn("autostart enable on setup failed", error);
+    completeSetup(values) {
+      if (installing || disposed) return Promise.resolve();
+      return trackOperation((async () => {
+        store.dispatch({ type: "completeSetup", ...values });
+        const granted = await platform.notifier.ensurePermission();
+        store.dispatch({ type: "setNotificationsBlocked", blocked: !granted });
+        const { settings } = store.getState().data;
+        if (applyAutostartOnSetup && platform.autostart.supported && settings.launchAtLogin) {
+          try {
+            await platform.autostart.setEnabled(true);
+          } catch (error) {
+            console.warn("autostart enable on setup failed", error);
+          }
         }
-      }
+      })());
     },
 
     reset() {
+      if (installing || disposed) return;
       store.dispatch({ type: "reset" });
     },
   };

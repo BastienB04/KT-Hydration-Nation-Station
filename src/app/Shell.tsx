@@ -9,6 +9,7 @@ import { History } from "../screens/History";
 import { Settings } from "../screens/Settings";
 import { About } from "../screens/About";
 import { Glyph, type GlyphName } from "../components/Glyph";
+import { UpdatePanel } from "../components/UpdatePanel";
 import { POND_SCREEN, openPondOnNotification, type Screen } from "./navigation";
 
 const NAV: { id: Screen; label: string; glyph: GlyphName }[] = [
@@ -37,6 +38,7 @@ export function Shell() {
         )}
       </header>
       <main className="app__main">
+        {screen !== "about" && <UpdatePanel notice />}
         {screen === "home" && <Home />}
         {screen === "history" && <History />}
         {screen === "settings" && <Settings />}

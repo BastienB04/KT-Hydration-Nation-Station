@@ -4,6 +4,7 @@
  * application code.
  */
 import { createMemoryPersistence } from "../platform/memory";
+import { createUnavailableUpdater } from "../platform/noUpdater";
 import type { Platform } from "../platform/types";
 
 export interface FakePlatformOptions {
@@ -65,6 +66,7 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
         ribbits += 1;
       },
     },
+    updater: createUnavailableUpdater(),
     autostart: {
       supported: options.autostartSupported ?? true,
       async isEnabled() {

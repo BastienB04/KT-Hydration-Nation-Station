@@ -32,6 +32,29 @@ export interface Tray {
   setAttention(due: boolean): Promise<void>;
 }
 
+export interface DownloadProgress {
+  downloadedBytes: number;
+  totalBytes: number | null;
+  /** Transfer is complete; signature verification may still be running. */
+  finished: boolean;
+}
+
+export interface UpdateDownload {
+  version: string;
+  /** Resolves only after the native signature and signed version are verified. */
+  download(onProgress: (progress: DownloadProgress) => void): Promise<void>;
+  /** On Windows, starts the installer with restart enabled and exits the app. */
+  install(): Promise<void>;
+  close(): Promise<void>;
+}
+
+export interface Updater {
+  supported: boolean;
+  check(): Promise<UpdateDownload | null>;
+  /** Fallback if installation returns instead of exiting the Windows process. */
+  relaunch(): Promise<void>;
+}
+
 export interface PlatformEvents {
   onTick(cb: () => void): Promise<() => void>;
   onWake(cb: () => void): Promise<() => void>;
@@ -48,5 +71,6 @@ export interface Platform {
   sound: Sound;
   autostart: Autostart;
   tray: Tray;
+  updater: Updater;
   events: PlatformEvents;
 }

@@ -15,6 +15,8 @@ use tauri_plugin_notification::NotificationExt;
 #[cfg(target_os = "macos")]
 use tauri_plugin_notification::{Action, ActionType};
 
+mod updates;
+
 const TRAY_ID: &str = "main";
 const TICK_SECONDS: u64 = 30;
 const MINIMIZED_FLAG: &str = "--minimized";
@@ -164,9 +166,13 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
+        .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             set_tray_tooltip,
-            set_tray_attention
+            set_tray_attention,
+            updates::updater_supported,
+            updates::check_for_update
         ])
         .setup(|app| {
             build_tray(app.handle())?;

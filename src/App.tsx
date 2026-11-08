@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { createController, type Controller } from "./app/controller";
+import { createUpdateManager, type UpdateManager } from "./app/updates";
 import { migrate } from "./core/migrate";
 import { createPlatform } from "./platform";
 import { Shell } from "./app/Shell";
@@ -11,6 +12,7 @@ import { themeController } from "./theme/boot";
 interface Ready {
   store: AppStore;
   controller: Controller;
+  updates: UpdateManager;
   platformKind: "tauri" | "browser";
 }
 
@@ -27,6 +29,7 @@ export default function App() {
     let disposed = false;
     let platform: Awaited<ReturnType<typeof createPlatform>> | undefined;
     let controller: Controller | undefined;
+    let updates: UpdateManager | undefined;
 
     (async () => {
       const pl = await createPlatform();
@@ -54,20 +57,28 @@ export default function App() {
         platform: pl,
         applyAutostartOnSetup: import.meta.env.PROD,
       });
+      updates = createUpdateManager({
+        store,
+        platform: pl,
+        prepareInstall: controller.prepareUpdate,
+      });
 
       if (disposed) {
+        updates.dispose();
         controller.dispose();
         pl.dispose();
         return;
       }
 
-      setReady({ store, controller, platformKind: pl.kind });
+      setReady({ store, controller, updates, platformKind: pl.kind });
       await controller.start();
       if (changed) controller.persist();
+      if (!disposed) await updates.start();
     })();
 
     return () => {
       disposed = true;
+      updates?.dispose();
       controller?.dispose();
       platform?.dispose();
     };
@@ -78,7 +89,12 @@ export default function App() {
   }
 
   return (
-    <AppProvider store={ready.store} controller={ready.controller} platformKind={ready.platformKind}>
+    <AppProvider
+      store={ready.store}
+      controller={ready.controller}
+      updates={ready.updates}
+      platformKind={ready.platformKind}
+    >
       <Root />
     </AppProvider>
   );

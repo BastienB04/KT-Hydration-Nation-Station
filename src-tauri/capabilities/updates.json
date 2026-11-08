@@ -1,0 +1,11 @@
+{
+  "identifier": "windows-updates",
+  "description": "Verified update downloads, installation and restart for the main Windows window",
+  "platforms": ["windows"],
+  "windows": ["main"],
+  "permissions": [
+    "updater:allow-download",
+    "updater:allow-install",
+    "process:allow-restart"
+  ]
+}

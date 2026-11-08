@@ -13,7 +13,7 @@ export async function createPlatform(): Promise<Platform & { dispose(): void }> 
   }
 
   const { createTauriPlatform, installCloseToTray } = await import("./tauri");
-  const platform = createTauriPlatform();
+  const platform = await createTauriPlatform();
   const unlistenClose = await installCloseToTray();
   const baseDispose = platform.dispose;
   return {
