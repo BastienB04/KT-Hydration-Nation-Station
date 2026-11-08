@@ -5,11 +5,13 @@
  */
 import {
   createDefaultData,
+  isThemeMode,
   LIMITS,
   type ActiveHours,
   type Entry,
   type PersistedData,
   type Settings,
+  type ThemeMode,
 } from "../core/schema";
 import { normalizeSettings } from "../core/settings";
 import { latestEntryAt } from "../core/stats";
@@ -28,6 +30,7 @@ export type Action =
   | { type: "editEntry"; key: DateKey; index: number; t: string; ml: number }
   | { type: "deleteEntry"; key: DateKey; index: number; t: string }
   | { type: "updateSettings"; settings: Settings }
+  | { type: "setTheme"; theme: ThemeMode }
   | { type: "completeSetup"; dailyGoalMl: number; activeHours: ActiveHours; frogName: string }
   | { type: "pauseUntil"; until: number }
   | { type: "snooze"; now: number }
@@ -108,6 +111,9 @@ export function reduce(root: RootState, action: Action): RootState {
     case "updateSettings":
       return withData(root, { ...data, settings: normalizeSettings(action.settings) });
 
+    case "setTheme":
+      if (!isThemeMode(action.theme) || action.theme === data.settings.theme) return root;
+      return withData(root, { ...data, settings: { ...data.settings, theme: action.theme } });
     case "completeSetup": {
       const settings = normalizeSettings({
         ...data.settings,

@@ -11,6 +11,9 @@ const DAY_FORMAT = new Intl.DateTimeFormat("en-GB", {
   month: "short",
 });
 
+const WEEKDAY_FORMAT = new Intl.DateTimeFormat("en-GB", { weekday: "short" });
+const WEEKDAY_LONG_FORMAT = new Intl.DateTimeFormat("en-GB", { weekday: "long" });
+const MONTH_SHORT_FORMAT = new Intl.DateTimeFormat("en-GB", { month: "short" });
 /** 1250 -> "1,250". */
 export function formatMl(n: number): string {
   return ML_FORMAT.format(n);
@@ -30,6 +33,18 @@ export function formatDayLabel(key: DateKey): string {
   return DAY_FORMAT.format(new Date(y, m - 1, d, 12));
 }
 
+/** "Tue" for a local date key (built at local noon). */
+export function formatWeekdayShort(key: DateKey): string {
+  const [y, m, d] = key.split("-").map(Number);
+  return WEEKDAY_FORMAT.format(new Date(y, m - 1, d, 12));
+}
+
+/** "Tuesday 3 Nov" for a local date key (built at local noon; no ICU comma). */
+export function formatDayLong(key: DateKey): string {
+  const [y, m, d] = key.split("-").map(Number);
+  const date = new Date(y, m - 1, d, 12);
+  return `${WEEKDAY_LONG_FORMAT.format(date)} ${d} ${MONTH_SHORT_FORMAT.format(date)}`;
+}
 /** Home status line describing the current reminder decision. */
 export function describeDecision(decision: Decision): string {
   switch (decision.kind) {

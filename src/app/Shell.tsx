@@ -1,25 +1,25 @@
 /**
- * The app shell once setup is done: header with the frog's name, the active
- * screen, a save-error banner and the bottom navigation.
+ * The app shell once setup is done: a visually hidden app heading, the
+ * save-error banner, the active screen and the C glyph dock.
  */
 import { useEffect, useState } from "react";
-import { useController, useData, useRoot } from "../state/AppContext";
+import { useController, useRoot } from "../state/AppContext";
 import { Home } from "../screens/Home";
 import { History } from "../screens/History";
 import { Settings } from "../screens/Settings";
 import { About } from "../screens/About";
+import { Glyph, type GlyphName } from "../components/Glyph";
 import { POND_SCREEN, openPondOnNotification, type Screen } from "./navigation";
 
-const NAV: { id: Screen; label: string }[] = [
-  { id: "home", label: "Pond" },
-  { id: "history", label: "Week" },
-  { id: "settings", label: "Settings" },
-  { id: "about", label: "About" },
+const NAV: { id: Screen; label: string; glyph: GlyphName }[] = [
+  { id: "home", label: "Pond", glyph: "nav/pond" },
+  { id: "history", label: "Week", glyph: "nav/week" },
+  { id: "settings", label: "Settings", glyph: "nav/settings" },
+  { id: "about", label: "About", glyph: "nav/about" },
 ];
 
 export function Shell() {
   const [screen, setScreen] = useState<Screen>(POND_SCREEN);
-  const data = useData();
   const { ui } = useRoot();
   const controller = useController();
 
@@ -29,32 +29,30 @@ export function Shell() {
   return (
     <div className="app">
       <header className="app__header">
-        <span className="app__brand">{data.settings.frogName}</span>
+        <h1 className="visually-hidden">KT-Hydration-Nation-Station</h1>
+        {ui.saveError && (
+          <p className="banner banner--alert" role="alert">
+            {ui.saveError}
+          </p>
+        )}
       </header>
-
-      {ui.saveError && (
-        <p className="banner banner--alert" role="alert">
-          {ui.saveError}
-        </p>
-      )}
-
       <main className="app__main">
         {screen === "home" && <Home />}
         {screen === "history" && <History />}
         {screen === "settings" && <Settings />}
         {screen === "about" && <About />}
       </main>
-
-      <nav className="app__nav" aria-label="Main">
+      <nav className="dock" aria-label="Main">
         {NAV.map((item) => (
           <button
             key={item.id}
             type="button"
-            className={item.id === screen ? "nav__item nav__item--active" : "nav__item"}
+            className="dock__item"
             aria-current={item.id === screen ? "page" : undefined}
             onClick={() => setScreen(item.id)}
           >
-            {item.label}
+            <Glyph name={item.glyph} />
+            <span>{item.label}</span>
           </button>
         ))}
       </nav>

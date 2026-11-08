@@ -1,7 +1,18 @@
-/** Last-7-days view with a goal comparison and the current streak. No chart library. */
-import { formatDayLabel, formatMl } from "../core/format";
+/**
+ * Week: the current streak with its caption, a lily-pad row, a seven-day bar
+ * chart against the goal and a weekly summary. No chart library; the bars and
+ * pads are decorative and each day's full text is visually hidden.
+ */
+import { Glyph } from "../components/Glyph";
+import { PeekHeader } from "../components/PeekHeader";
+import { Ribbit } from "../components/Ribbit";
+import { formatDayLong, formatMl, formatWeekdayShort } from "../core/format";
 import { lastSevenDays, streak } from "../core/stats";
+import { streakCaption, weekSummary } from "../core/week";
 import { useData } from "../state/AppContext";
+
+/** Bars are scaled so 125 % of the goal fills the plot; the goal line sits at 80 %. */
+const BAR_CAP = 1.25;
 
 export function History() {
   const data = useData();
@@ -9,33 +20,88 @@ export function History() {
   const goal = data.settings.dailyGoalMl;
   const days = lastSevenDays(data.log, now, goal);
   const run = streak(data.log, now, goal);
+  const summary = weekSummary(days);
 
   return (
     <section className="screen">
-      <h2 className="screen__title">This week</h2>
-      <p className="history__streak">
-        {run > 0 ? `${run}-day streak` : "No streak yet: today's a good day to start"}
-      </p>
-      <ol className="history__list">
-        {days.map((day) => {
-          const width = Math.min(day.total / goal, 1.25);
-          return (
-            <li key={day.key} className="history__row">
-              <span className="history__label">{day.isToday ? "Today" : formatDayLabel(day.key)}</span>
-              <span className="history__bar-track" aria-hidden="true">
-                <span
-                  className={day.met ? "history__bar history__bar--met" : "history__bar"}
-                  style={{ width: `${width * 100}%` }}
-                />
-                <span className="history__goal-marker" />
-              </span>
-              <span className="history__value">
-                {formatMl(day.total)} / {formatMl(goal)} ml{day.met ? " · Goal met" : ""}
-              </span>
-            </li>
-          );
-        })}
-      </ol>
+      <PeekHeader title="This week">
+        <Ribbit pose="happy" variant="peek" />
+      </PeekHeader>
+
+      <section className="card streak-card">
+        <p className="streak-card__run">
+          <span className="streak-card__number">{run}</span>
+          <span className="streak-card__unit">day streak</span>
+        </p>
+        <p className="streak-card__caption">{streakCaption(days, run)}</p>
+        <div className="streak-card__pads" aria-hidden="true">
+          {days.map((day) =>
+            day.met ? (
+              <Glyph key={day.key} name="prop/lily-pad-flower" />
+            ) : day.isToday ? (
+              <span key={day.key} className="streak-card__today-pad" />
+            ) : (
+              <Glyph key={day.key} name="prop/lily-pad" />
+            ),
+          )}
+        </div>
+      </section>
+
+      <section className="card week-chart" aria-labelledby="week-chart-title">
+        <div className="week-chart__head">
+          <h3 id="week-chart-title" className="card__title">
+            Sips per day
+          </h3>
+          <p className="week-chart__legend">
+            <span className="week-chart__legend-line" aria-hidden="true" />
+            goal {formatMl(goal)}
+          </p>
+        </div>
+        <div className="week-chart__body">
+          <ol className="week-chart__cols" aria-label="Last seven days">
+            {days.map((day) => {
+              const height = (Math.min(day.total / goal, BAR_CAP) / BAR_CAP) * 100;
+              const classes = ["week-chart__bar"];
+              if (day.isToday) classes.push("week-chart__bar--today");
+              const label = day.isToday ? "Today" : formatWeekdayShort(day.key);
+              return (
+                <li key={day.key} className="week-chart__col">
+                  <span className="week-chart__plot" aria-hidden="true">
+                    {day.total > 0 && (
+                      <span className={classes.join(" ")} style={{ height: `${height}%` }}>
+                        {day.met && <Glyph name="prop/heart" className="week-chart__heart" />}
+                      </span>
+                    )}
+                  </span>
+                  <span className="week-chart__day" aria-hidden="true">
+                    {label}
+                  </span>
+                  <span className="week-chart__value" aria-hidden="true">
+                    {formatMl(day.total)}
+                  </span>
+                  <span className="visually-hidden">
+                    {day.isToday ? "Today, " : ""}
+                    {formatDayLong(day.key)}: {formatMl(day.total)} of {formatMl(goal)} ml
+                    {day.met ? ", goal met" : ""}
+                  </span>
+                </li>
+              );
+            })}
+          </ol>
+          <span className="week-chart__goal-line" aria-hidden="true" />
+          <span className="week-chart__axis" aria-hidden="true" />
+        </div>
+      </section>
+
+      <section className="card week-summary">
+        <p>
+          Average <strong>{formatMl(summary.averageMl)} ml</strong> ·{" "}
+          <strong>
+            {summary.metCount} of {days.length}
+          </strong>{" "}
+          days at goal
+        </p>
+      </section>
     </section>
   );
 }

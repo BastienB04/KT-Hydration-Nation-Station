@@ -18,6 +18,7 @@ export interface FakePlatformHandle {
   platform: Platform;
   sent: Array<{ title: string; body: string }>;
   tooltips: string[];
+  attention: boolean[];
   autostartCalls: boolean[];
   ribbitCount(): number;
   activeListeners(): number;
@@ -33,6 +34,7 @@ export interface FakePlatformHandle {
 export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatformHandle {
   const sent: Array<{ title: string; body: string }> = [];
   const tooltips: string[] = [];
+  const attention: boolean[] = [];
   const autostartCalls: boolean[] = [];
   let ribbits = 0;
   let granted = options.granted ?? true;
@@ -78,6 +80,9 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
       async setTooltip(text) {
         tooltips.push(text);
       },
+      async setAttention(due) {
+        attention.push(due);
+      },
     },
     events: {
       async onTick(cb) {
@@ -107,6 +112,7 @@ export function createFakePlatform(options: FakePlatformOptions = {}): FakePlatf
     platform,
     sent,
     tooltips,
+    attention,
     autostartCalls,
     ribbitCount: () => ribbits,
     activeListeners: () =>

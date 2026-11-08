@@ -4,6 +4,7 @@
  */
 import {
   DEFAULT_SETTINGS,
+  isThemeMode,
   LIMITS,
   type ActiveHours,
   type Settings,
@@ -65,7 +66,7 @@ export type SettingsErrorKey =
   | "quickAddMl.2";
 
 export type SettingsDraftResult =
-  | { ok: true; settings: Settings }
+  | { ok: true; settings: Omit<Settings, "theme"> }
   | { ok: false; errors: Partial<Record<SettingsErrorKey, string>> };
 
 function parseIntField(text: string, min: number, max: number): number | null {
@@ -80,6 +81,14 @@ export function parseGoal(text: string): number | null {
   return parseIntField(text, LIMITS.goalMinMl, LIMITS.goalMaxMl);
 }
 
+/**
+ * Step a goal field by `delta` ml for the -/+ buttons. Invalid text steps from
+ * the default goal; the result is clamped to the goal limits.
+ */
+export function stepGoal(text: string, delta: number): string {
+  const base = parseGoal(text) ?? DEFAULT_SETTINGS.dailyGoalMl;
+  return String(Math.min(LIMITS.goalMaxMl, Math.max(LIMITS.goalMinMl, base + delta)));
+}
 /** Validate a draft into Settings, collecting per-field errors. */
 export function validateSettingsDraft(draft: SettingsDraft): SettingsDraftResult {
   const errors: Partial<Record<SettingsErrorKey, string>> = {};
@@ -200,5 +209,6 @@ export function normalizeSettings(raw: unknown): Settings {
     checkUpdates: boolOr(src.checkUpdates, DEFAULT_SETTINGS.checkUpdates),
     frogName,
     setupDone: boolOr(src.setupDone, DEFAULT_SETTINGS.setupDone),
+    theme: isThemeMode(src.theme) ? src.theme : DEFAULT_SETTINGS.theme,
   };
 }

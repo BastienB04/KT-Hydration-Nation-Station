@@ -1,12 +1,14 @@
 /**
- * Shows the current reminder status and the pause/snooze controls. Recomputes
- * on every render and on a 30-second clock so "next" stays roughly current
- * even when nothing else changes.
+ * Compact reminder card: the current reminder status, Snooze and the Pause
+ * disclosure. Recomputes on every render and on a 30-second clock so "next"
+ * stays roughly current even when nothing else changes.
  */
 import { useEffect, useState } from "react";
 import { describeDecision } from "../core/format";
 import { evaluate } from "../core/scheduler";
 import { useController, useData, useRoot } from "../state/AppContext";
+import { Glyph } from "./Glyph";
+import { PauseMenu } from "./PauseMenu";
 
 const CLOCK_MS = 30_000;
 
@@ -25,8 +27,17 @@ export function ReminderStatus() {
   const paused = decision.kind === "paused";
 
   return (
-    <section className="reminder">
-      <p className="reminder__status">{describeDecision(decision)}</p>
+    <section className="card reminder-card">
+      <div className="reminder-card__main">
+        <Glyph name={decision.kind === "goal-met" ? "icon/check" : "icon/bell"} />
+        <p className="reminder-card__status">{describeDecision(decision)}</p>
+        <div className="reminder-card__controls">
+          <button type="button" className="btn btn--small btn--pill" onClick={() => controller.snooze()}>
+            Snooze {data.settings.snoozeMin} min
+          </button>
+          <PauseMenu paused={paused} />
+        </div>
+      </div>
 
       {ui.notificationsBlocked && (
         <p className="banner banner--warn" role="status">
@@ -34,29 +45,6 @@ export function ReminderStatus() {
           to get a nudge.
         </p>
       )}
-
-      <div className="reminder__controls">
-        <button type="button" className="btn btn--small" onClick={() => controller.snooze()}>
-          Snooze {data.settings.snoozeMin} min
-        </button>
-        <button type="button" className="btn btn--small" onClick={() => controller.pauseFor(30)}>
-          Pause 30 min
-        </button>
-        <button type="button" className="btn btn--small" onClick={() => controller.pauseFor(60)}>
-          Pause 1 h
-        </button>
-        <button type="button" className="btn btn--small" onClick={() => controller.pauseFor(120)}>
-          Pause 2 h
-        </button>
-        <button type="button" className="btn btn--small" onClick={() => controller.pauseRestOfDay()}>
-          Rest of day
-        </button>
-        {paused && (
-          <button type="button" className="btn btn--small btn--primary" onClick={() => controller.resume()}>
-            Resume
-          </button>
-        )}
-      </div>
     </section>
   );
 }

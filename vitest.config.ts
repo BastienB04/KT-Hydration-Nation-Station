@@ -10,6 +10,8 @@ export default defineConfig({
   test: {
     include: ["src/**/*.test.ts"],
     environment: "node",
+    // Process CSS so `?raw` imports return the stylesheet text (tokens.test.ts).
+    css: true,
     env: { TZ: "Europe/London" },
   },
 });

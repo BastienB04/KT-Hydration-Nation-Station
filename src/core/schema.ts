@@ -4,7 +4,21 @@
  */
 import type { DateKey } from "./time";
 
+/**
+ * Stays 1 through Phase 4: `settings.theme` is an additive field and
+ * `normalizeSettings` defaults every field independently, so a v1 store simply
+ * gains `theme: "system"` with every other value untouched (no transform
+ * step). Keeping 1 is also downgrade-safe: an older build reading a newer
+ * store drops the unknown key instead of treating the file as unsupported.
+ */
 export const SCHEMA_VERSION = 1;
+/** Appearance preference: follow the OS, or force light or dark. */
+export type ThemeMode = "system" | "light" | "dark";
+export const THEME_MODES: readonly ThemeMode[] = ["system", "light", "dark"];
+/** Strict check: only the exact lowercase mode strings are accepted. */
+export function isThemeMode(value: unknown): value is ThemeMode {
+  return typeof value === "string" && (THEME_MODES as readonly string[]).includes(value);
+}
 
 export interface ActiveHours {
   /** Local `HH:MM`, inclusive start of the reminder window. */
@@ -26,6 +40,7 @@ export interface Settings {
   checkUpdates: boolean;
   frogName: string;
   setupDone: boolean;
+  theme: ThemeMode;
 }
 
 export interface Entry {
@@ -77,6 +92,7 @@ export const DEFAULT_SETTINGS: Settings = {
   checkUpdates: true,
   frogName: "Ribbit",
   setupDone: false,
+  theme: "system",
 };
 
 export const DEFAULT_STATE: PersistedState = {

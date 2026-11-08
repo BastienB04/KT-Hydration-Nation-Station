@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createDefaultData, type PersistedData } from "../core/schema";
+import { createDefaultData, type PersistedData, type Settings } from "../core/schema";
 import { createAppStore } from "../state/store";
 import type { RootState } from "../state/reducer";
 import { createFakePlatform } from "../test/fakePlatform";
@@ -127,6 +127,60 @@ describe("controller tray actions", () => {
   });
 });
 
+describe("controller tray due icon", () => {
+  it("sends false once at start and does not resend on unchanged ticks", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    let clock = at(8, 30);
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    expect(h.attention).toEqual([false]);
+    clock = at(8, 40);
+    h.emitTick();
+    h.emitWake();
+    await settle();
+    expect(h.attention).toEqual([false]);
+    c.dispose();
+  });
+
+  it("turns on when a reminder fires, stays on while waiting, and clears on a drink", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    let clock = at(8, 30);
+    const c = createController({ store, platform: h.platform, now: () => clock, applyAutostartOnSetup: false });
+    await c.start();
+    clock = at(9);
+    h.emitTick();
+    await settle();
+    expect(h.sent).toHaveLength(1);
+    expect(h.attention).toEqual([false, true]);
+
+    clock = at(9, 10);
+    h.emitTick();
+    await settle();
+    expect(h.attention).toEqual([false, true]);
+
+    c.logDrink(250);
+    await settle();
+    expect(h.attention).toEqual([false, true, false]);
+    c.dispose();
+  });
+
+  it("clears when reminders are paused", async () => {
+    // OS autostart matches settings, so start() makes no settings dispatch first.
+    const h = createFakePlatform({ autostartEnabled: true });
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(9), applyAutostartOnSetup: false });
+    await c.start(); // due at 09:00, so a reminder fires during start
+    await settle();
+    expect(h.attention).toEqual([true]);
+    c.pauseFor(60);
+    await settle();
+    expect(h.attention).toEqual([true, false]);
+    c.dispose();
+  });
+});
+
 describe("controller notification clicks", () => {
   it("listens for clicks before the first reminder can be sent", async () => {
     const h = createFakePlatform();
@@ -225,6 +279,32 @@ describe("controller celebration and settings", () => {
   });
 });
 
+describe("controller theme", () => {
+  it("setTheme changes the theme live and persists it through the save queue", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(8, 30), applyAutostartOnSetup: false });
+    await c.start();
+    c.setTheme("dark");
+    expect(store.getState().data.settings.theme).toBe("dark");
+    await settle();
+    const saved = (await h.platform.persistence.load()) as PersistedData;
+    expect(saved.settings.theme).toBe("dark");
+    c.dispose();
+  });
+  it("saveSettings keeps the stored theme even when given a stale one", async () => {
+    const h = createFakePlatform();
+    const store = buildStore();
+    const c = createController({ store, platform: h.platform, now: () => at(8, 30), applyAutostartOnSetup: false });
+    await c.start();
+    const stale: Settings = { ...store.getState().data.settings, theme: "light" };
+    c.setTheme("dark");
+    await c.saveSettings({ ...stale, dailyGoalMl: 2500 });
+    expect(store.getState().data.settings.dailyGoalMl).toBe(2500);
+    expect(store.getState().data.settings.theme).toBe("dark");
+    c.dispose();
+  });
+});
 describe("controller setup and boot", () => {
   it("does not touch the OS autostart when applyAutostartOnSetup is false", async () => {
     const h = createFakePlatform();

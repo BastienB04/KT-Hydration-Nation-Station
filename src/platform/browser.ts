@@ -93,6 +93,9 @@ export function createBrowserPlatform(): Platform & { dispose(): void } {
       async setTooltip() {
         // No tray in the browser.
       },
+      async setAttention() {
+        // No tray in the browser.
+      },
     },
     events: {
       async onTick(cb) {

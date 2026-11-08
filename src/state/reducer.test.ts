@@ -101,6 +101,30 @@ describe("settings and setup", () => {
   });
 });
 
+describe("setTheme", () => {
+  it("sets the theme without touching other settings", () => {
+    const start = root();
+    const next = reduce(start, { type: "setTheme", theme: "dark" });
+    expect(next.data.settings.theme).toBe("dark");
+    expect({ ...next.data.settings, theme: "system" }).toEqual(start.data.settings);
+    expect(next.data.log).toBe(start.data.log);
+  });
+  it("returns the same root when unchanged", () => {
+    const start = root((d) => {
+      d.settings.theme = "light";
+    });
+    expect(reduce(start, { type: "setTheme", theme: "light" })).toBe(start);
+  });
+  it("ignores an invalid mode", () => {
+    const start = root();
+    const bad = { type: "setTheme", theme: "Dark" } as unknown as Parameters<typeof reduce>[1];
+    expect(reduce(start, bad)).toBe(start);
+  });
+  it("reset restores system", () => {
+    const start = reduce(root(), { type: "setTheme", theme: "dark" });
+    expect(reduce(start, { type: "reset" }).data.settings.theme).toBe("system");
+  });
+});
 describe("pause, snooze, resume", () => {
   it("snooze pauses by the snooze length", () => {
     const start = root((d) => {

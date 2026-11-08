@@ -1,14 +1,38 @@
-/** About screen. Version, one-liner and the fluid disclaimer. */
+/** About screen: version, one-liner, the fluid disclaimer and credits. */
+import { PeekHeader } from "../components/PeekHeader";
+import { Ribbit } from "../components/Ribbit";
 import { FLUID_DISCLAIMER } from "../core/tips";
+
+export const APP_VERSION = "0.1.0";
+/** Copyright line of public/licenses/Nunito-OFL.txt. */
+const NUNITO_COPYRIGHT = "Copyright 2014 The Nunito Project Authors (https://github.com/googlefonts/nunito)";
 
 export function About() {
   return (
     <section className="screen">
-      <h2 className="screen__title">About</h2>
-      <p className="screen__hint">
-        KT-Hydration-Nation-Station 0.1.0 · a cartoon frog that reminds you to drink water.
-      </p>
-      <p className="tip-card__disclaimer">{FLUID_DISCLAIMER}</p>
+      <PeekHeader title="About">
+        <Ribbit pose="base" variant="peek" />
+      </PeekHeader>
+
+      <section className="card about-card" aria-labelledby="about-name">
+        <h3 id="about-name" className="card__title">
+          KT-Hydration-Nation-Station
+        </h3>
+        <p className="about-card__version">Version {APP_VERSION}</p>
+        <p>A cartoon frog that reminds you to drink water.</p>
+        <p className="about-card__note">{FLUID_DISCLAIMER}</p>
+      </section>
+
+      <section className="card about-card" aria-labelledby="about-credits">
+        <h3 id="about-credits" className="card__title">
+          Credits
+        </h3>
+        <p>Ribbit and all app artwork are original drawings made for this project.</p>
+        <p>
+          Nunito typeface: {NUNITO_COPYRIGHT}, licensed under the SIL Open Font License 1.1. The
+          licence ships with the app as licenses/Nunito-OFL.txt.
+        </p>
+      </section>
     </section>
   );
 }

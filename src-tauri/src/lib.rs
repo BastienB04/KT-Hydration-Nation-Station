@@ -7,6 +7,7 @@
 
 use std::{thread, time::Duration};
 
+use tauri::image::Image;
 use tauri::menu::{Menu, MenuItem, PredefinedMenuItem};
 use tauri::tray::{MouseButton, MouseButtonState, TrayIconBuilder, TrayIconEvent};
 use tauri::{AppHandle, Emitter, Manager, Runtime};
@@ -17,6 +18,16 @@ use tauri_plugin_notification::{Action, ActionType};
 const TRAY_ID: &str = "main";
 const TICK_SECONDS: u64 = 30;
 const MINIMIZED_FLAG: &str = "--minimized";
+
+// Dedicated 32x32 tray icons, rendered from frog_graphic_art_theme/ribbit_svg/icon-tray*.svg.
+// The due variant adds a water drop while a reminder is unanswered.
+const TRAY_ICON_NORMAL: Image<'static> = tauri::include_image!("icons/tray/tray-normal.png");
+const TRAY_ICON_DUE: Image<'static> = tauri::include_image!("icons/tray/tray-due.png");
+
+/// The tray icon for the given reminder state.
+fn tray_icon(due: bool) -> Image<'static> {
+    if due { TRAY_ICON_DUE } else { TRAY_ICON_NORMAL }
+}
 
 // Tray-driven frontend events. The frontend validates these payloads before use.
 const TRAY_LOG_EVENT: &str = "tray-log";
@@ -81,6 +92,17 @@ fn set_tray_tooltip(app: AppHandle, text: String) -> Result<(), String> {
     }
 }
 
+/// Frontend -> tray: show the due icon while a reminder is unanswered.
+#[tauri::command]
+fn set_tray_attention(app: AppHandle, due: bool) -> Result<(), String> {
+    match app.tray_by_id(TRAY_ID) {
+        Some(tray) => tray
+            .set_icon(Some(tray_icon(due)))
+            .map_err(|e| e.to_string()),
+        None => Err("tray icon not found".to_owned()),
+    }
+}
+
 /// Tray icon with a context menu. Left-click restores the window, right-click opens
 /// the menu. Note: on macOS 26 the `tray-icon` crate's click overlay receives no
 /// mouse events at all (observed 4 Nov 2026 with tray-icon 0.25.1), so on the Mac
@@ -94,13 +116,8 @@ fn build_tray<R: Runtime>(app: &AppHandle<R>) -> tauri::Result<()> {
     let quit = MenuItem::with_id(app, "quit", "Quit", true, None::<&str>)?;
     let menu = Menu::with_items(app, &[&open, &log, &pause, &separator, &quit])?;
 
-    let icon = app
-        .default_window_icon()
-        .cloned()
-        .expect("the bundled window icon is always present");
-
     TrayIconBuilder::with_id(TRAY_ID)
-        .icon(icon)
+        .icon(tray_icon(false))
         .tooltip("KT-Hydration-Nation-Station")
         .menu(&menu)
         .show_menu_on_left_click(false)
@@ -147,7 +164,10 @@ pub fn run() {
         .plugin(tauri_plugin_store::Builder::new().build())
         .plugin(tauri_plugin_notification::init())
         .plugin(tauri_plugin_opener::init())
-        .invoke_handler(tauri::generate_handler![set_tray_tooltip])
+        .invoke_handler(tauri::generate_handler![
+            set_tray_tooltip,
+            set_tray_attention
+        ])
         .setup(|app| {
             build_tray(app.handle())?;
 
@@ -214,7 +234,21 @@ pub fn run() {
 mod tests {
     use super::{
         TRAY_LOG_ML, TRAY_PAUSE_MINUTES, TrayAction, notification_opens_main, tray_action,
+        tray_icon,
     };
+
+    #[test]
+    fn tray_icons_are_32_px_squares() {
+        for due in [false, true] {
+            let icon = tray_icon(due);
+            assert_eq!((icon.width(), icon.height()), (32, 32), "due={due}");
+        }
+    }
+
+    #[test]
+    fn due_tray_icon_differs_from_normal() {
+        assert_ne!(tray_icon(false).rgba(), tray_icon(true).rgba());
+    }
 
     #[test]
     fn known_ids_map_to_actions() {

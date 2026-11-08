@@ -2,7 +2,7 @@
 
 A small Windows desktop app in which Ribbit, a cartoon frog, reminds you to drink water. Log what you drink, watch the pond fill up, keep your streak of lily pads going.
 
-**Status: in development (Phase 3 of 8).** No installer is published yet. The plan and requirements are in [`docs/Requirements_Scoping_Refined.md`](docs/Requirements_Scoping_Refined.md).
+**Status: in development (Phase 4 of 8).** No installer is published yet. The plan and requirements are in [`docs/Requirements_Scoping_Refined.md`](docs/Requirements_Scoping_Refined.md).
 
 ## Install (Windows)
 
@@ -21,6 +21,8 @@ npm test -- --run      # unit tests (Vitest)
 npm run tauri build    # local installer for your current OS
 ```
 
+Settings → Ribbit & app → **Theme** picks System, Light or Dark. The choice applies right away; System (the default) follows your Windows or macOS appearance.
+
 Your data (intake log and settings) lives in a `store.json` file in the OS app-data folder for the app identifier (on Windows, `%APPDATA%\com.bastienb04.kt-hydration-nation-station\`).
 
 Windows installers for releases are built by GitHub Actions (`.github/workflows`), not on a developer machine.
@@ -31,4 +33,4 @@ Tauri 2 (Rust) + React 19 + TypeScript + Vite. Plugins: notification, autostart,
 
 ## Licence
 
-MIT (to be added with the first release).
+MIT (to be added with the first release). Ribbit and all app artwork are original to this project. The bundled Nunito typeface is under the SIL Open Font License 1.1; its licence ships with the app as `licenses/Nunito-OFL.txt` (source: [`public/licenses/Nunito-OFL.txt`](public/licenses/Nunito-OFL.txt)).

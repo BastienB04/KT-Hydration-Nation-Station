@@ -6,6 +6,7 @@ import { Shell } from "./app/Shell";
 import { Setup } from "./screens/Setup";
 import { AppProvider, useData } from "./state/AppContext";
 import { createAppStore, type AppStore } from "./state/store";
+import { themeController } from "./theme/boot";
 
 interface Ready {
   store: AppStore;
@@ -15,6 +16,7 @@ interface Ready {
 
 function Root() {
   const data = useData();
+  useEffect(() => themeController.setMode(data.settings.theme), [data.settings.theme]);
   return data.settings.setupDone ? <Shell /> : <Setup />;
 }
 

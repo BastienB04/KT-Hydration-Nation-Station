@@ -28,6 +28,8 @@ export interface Autostart {
 
 export interface Tray {
   setTooltip(text: string): Promise<void>;
+  /** Show the "due" tray icon while a reminder is unanswered. */
+  setAttention(due: boolean): Promise<void>;
 }
 
 export interface PlatformEvents {

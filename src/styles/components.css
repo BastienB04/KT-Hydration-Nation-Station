@@ -1,315 +1,123 @@
-/* Phase 3 functional styling. Uses only the tokens in tokens.css; Phase 4 does
-   the frog art, pond polish and celebration. Laid out to fit 360x600. */
+/* Direction C "Playful cards" component system. Uses only tokens.css.
+   Thick --line borders carry every boundary, so fills never have to.
+   Laid out to fit 360x600 and centred up to --canvas-max. */
 
-.visually-hidden {
-  position: absolute;
-  width: 1px;
-  height: 1px;
-  padding: 0;
-  margin: -1px;
-  overflow: hidden;
-  clip: rect(0, 0, 0, 0);
-  white-space: nowrap;
-  border: 0;
+/* ---------- Cards ---------- */
+.card {
+  background: var(--surface);
+  border: var(--stroke-card) solid var(--line);
+  border-radius: var(--radius-card);
+  padding: 14px 18px;
+  min-width: 0;
 }
 
-.section__title {
-  margin: 4px 0;
-  font-size: 1rem;
-  color: var(--accent-strong);
+.card--inset {
+  background: var(--surface-inset);
 }
 
-/* Buttons */
+.card__title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--text);
+}
+
+.card__label {
+  font-size: 0.875rem;
+  font-weight: 800;
+  color: var(--text-muted);
+}
+
+/* ---------- Buttons ---------- */
 .btn {
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-m);
-  padding: 9px 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: var(--tap-min);
+  padding: 8px 16px;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: var(--radius-pill);
   background: var(--surface);
   color: var(--text);
-  font-weight: 700;
+  font-weight: 900;
+  line-height: 1.1;
+  text-decoration: none;
+  transition: transform var(--duration-fast) var(--ease-bounce);
 }
 
-.btn:hover {
-  border-color: var(--accent-strong);
+.btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+
+.btn:active:not(:disabled) {
+  transform: translateY(1px);
 }
 
 .btn--primary {
-  background: var(--accent-strong);
-  color: var(--on-accent-strong);
-  border-color: var(--accent-strong);
+  background: var(--primary);
+  color: var(--on-primary);
 }
 
-.btn--ghost {
-  background: transparent;
-  border-color: transparent;
-  color: var(--accent-strong);
-}
-
-.btn--small {
-  padding: 5px 10px;
-  font-size: 0.85rem;
-  border-radius: var(--radius-s);
+/* Inset pill: secondary actions such as Snooze and Pause. */
+.btn--pill {
+  background: var(--surface-inset);
 }
 
 .btn--danger {
-  background: var(--blush);
-  border-color: var(--blush);
-  color: var(--fly-black);
+  color: var(--danger);
 }
 
+.btn--ghost {
+  border-color: transparent;
+  background: transparent;
+  color: var(--link);
+}
+
+.btn--small {
+  min-height: 36px;
+  padding: 4px 12px;
+  font-size: 0.875rem;
+}
+
+.btn--icon {
+  min-width: var(--tap-min);
+  padding: 0;
+  border-color: transparent;
+  background: transparent;
+}
+
+/* Disabled: dashed border and muted label; never colour or opacity alone. */
 .btn:disabled {
-  opacity: 0.5;
+  border-style: dashed;
+  color: var(--text-muted);
   cursor: not-allowed;
 }
 
-/* Pond */
-.pond-wrap {
-  display: flex;
-  flex-direction: column;
+.btn--ghost:disabled,
+.btn--icon:disabled {
+  border-color: transparent;
+}
+
+/* ---------- Pills (badges) ---------- */
+.pill {
+  display: inline-flex;
   align-items: center;
-  gap: 4px;
-}
-
-.pond {
-  position: relative;
-  overflow: hidden;
-  background: radial-gradient(circle at 50% 35%, #cdeafb, var(--surface));
-}
-
-.pond__water {
-  position: absolute;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: linear-gradient(var(--water), var(--accent-strong));
-  transition: height var(--duration-slow) var(--ease-bounce);
-}
-
-.pond__readout {
-  margin: 2px 0 0;
-  font-size: 1.05rem;
-}
-
-.pond__met {
-  margin: 0;
-  color: var(--accent-strong);
-  font-weight: 700;
-}
-
-/* Quick-add */
-.quick-add,
-.today,
-.reminder,
-.tip-card {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.quick-add__buttons {
-  display: grid;
-  grid-auto-flow: column;
-  grid-auto-columns: 1fr;
-  gap: 8px;
-}
-
-.quick-add__custom-row {
-  display: flex;
-  gap: 8px;
-}
-
-.quick-add__custom-row input,
-.field input[type="number"],
-.field input[type="text"],
-.field input[type="time"] {
-  flex: 1;
-  min-width: 0;
-  padding: 8px 10px;
-  border: 1px solid var(--accent);
-  border-radius: var(--radius-s);
+  gap: 6px;
+  padding: 4px 12px;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: var(--radius-pill);
   background: var(--surface);
   color: var(--text);
+  font-size: 0.8125rem;
+  font-weight: 900;
 }
 
-.field-error {
-  margin: 2px 0 0;
-  color: #b4371f;
-  font-size: 0.85rem;
-}
-
-@media (prefers-color-scheme: dark) {
-  .field-error {
-    color: #ff9e86;
-  }
-}
-
-/* Today list */
-.today__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.today__row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.today__time {
-  color: var(--text-muted);
-  font-variant-numeric: tabular-nums;
-}
-
-.today__amount {
-  font-weight: 700;
-  margin-right: auto;
-}
-
-.today__edit {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  flex-wrap: wrap;
-  width: 100%;
-}
-
-.today__edit input {
-  width: 90px;
-}
-
-/* Reminder */
-.reminder__status {
-  margin: 0;
-  font-weight: 700;
-}
-
-.reminder__controls {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-}
-
-/* Banners */
-.banner {
-  margin: 0 18px 8px;
-  padding: 8px 12px;
-  border-radius: var(--radius-s);
-  font-size: 0.9rem;
-}
-
-.banner--alert {
-  background: var(--blush);
-  color: var(--fly-black);
-}
-
-.banner--warn {
-  background: var(--sunny-cream);
-  color: var(--fly-black);
-  border: 1px solid var(--accent);
-}
-
-/* Tips */
-.tip-card {
-  padding: 12px;
-  background: var(--surface);
-  border-radius: var(--radius-m);
-  box-shadow: var(--shadow);
-}
-
-.tip-card__text {
-  margin: 0;
-}
-
-.tip-card__disclaimer {
-  margin: 0;
-  font-size: 0.75rem;
-  color: var(--text-muted);
-}
-
-/* History */
-.history__streak {
-  margin: 0;
-  font-weight: 800;
-  color: var(--accent-strong);
-}
-
-.history__list {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.history__row {
-  display: grid;
-  grid-template-columns: 64px 1fr;
-  grid-template-areas: "label bar" "label value";
-  gap: 2px 8px;
-  align-items: center;
-}
-
-.history__label {
-  grid-area: label;
-  font-size: 0.85rem;
-  color: var(--text-muted);
-}
-
-.history__bar-track {
-  grid-area: bar;
-  position: relative;
-  height: 14px;
-  background: var(--surface);
-  border-radius: var(--radius-s);
-  box-shadow: inset 0 0 0 1px rgba(31, 111, 91, 0.2);
-  overflow: hidden;
-}
-
-.history__bar {
-  display: block;
-  height: 100%;
-  background: var(--water);
-  max-width: 125%;
-}
-
-.history__bar--met {
-  background: var(--accent-strong);
-}
-
-.history__goal-marker {
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 80%;
-  width: 2px;
-  background: var(--fly-black);
-  opacity: 0.4;
-}
-
-.history__value {
-  grid-area: value;
-  font-size: 0.8rem;
-  color: var(--text-muted);
-}
-
-/* Settings and forms */
-.settings,
-.setup__panel {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
+/* ---------- Fields ---------- */
 .field {
   display: flex;
   flex-direction: column;
   gap: 4px;
+  min-width: 0;
   border: 0;
   padding: 0;
   margin: 0;
@@ -323,64 +131,223 @@
 
 .field__hint {
   color: var(--text-muted);
-  font-size: 0.8rem;
+  font-size: 0.8125rem;
 }
 
 .field__group-label {
-  font-weight: 700;
+  font-weight: 800;
 }
 
-.settings__quick,
-.settings__days,
-.settings__hours {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
+.input,
+.field input[type="number"],
+.field input[type="text"],
+.field input[type="time"] {
+  flex: 1;
+  min-width: 0;
+  min-height: 36px;
+  padding: 6px 12px;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  color: var(--text);
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
 }
 
-.settings__quick input {
-  width: 80px;
+.input::placeholder {
+  color: var(--text-muted);
+  opacity: 1;
 }
 
-.settings__hours input[type="time"] {
-  width: auto;
-  flex: 0 0 auto;
+.input[aria-invalid="true"],
+.field input[aria-invalid="true"] {
+  border-color: var(--danger);
+  border-style: dashed;
 }
 
-.settings__day {
+.field-error {
+  margin: 2px 0 0;
+  color: var(--danger);
+  font-size: 0.875rem;
+  font-weight: 800;
+}
+
+/* ---------- Switch: <input type="checkbox" role="switch" class="switch"> ---------- */
+.switch {
+  appearance: none;
+  position: relative;
+  flex: none;
+  width: 46px;
+  height: 26px;
+  margin: 0;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+  cursor: pointer;
+}
+
+/* The knob keeps an ink outline in both themes; its position carries the state. */
+.switch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 3px;
+  width: 16px;
+  height: 16px;
+  border: var(--stroke-control) solid var(--ink);
+  border-radius: 50%;
+  background: var(--white);
+  transform: translateY(-50%);
+  transition: left var(--duration-fast) var(--ease-bounce);
+}
+
+.switch:checked {
+  background: var(--primary);
+}
+
+.switch:checked::before {
+  left: calc(100% - 3px - 16px);
+}
+
+.switch:disabled {
+  border-style: dashed;
+  cursor: not-allowed;
+}
+
+/* ---------- Segmented control: fieldset of radios ---------- */
+.segmented {
+  display: inline-flex;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: var(--radius-pill);
+  background: var(--surface-inset);
+}
+
+.segmented__option {
+  position: relative;
+  display: inline-flex;
+}
+
+.segmented__option input {
+  position: absolute;
+  inset: 0;
+  margin: 0;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.segmented__option span {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  min-height: 32px;
+  padding: 2px 14px;
+  border: var(--stroke-control) solid transparent;
+  border-radius: var(--radius-pill);
+  font-size: 0.875rem;
+  font-weight: 700;
+  color: var(--text);
 }
 
-.settings__status {
-  margin: 0;
-  color: var(--accent-strong);
-  min-height: 1.1em;
+/* Selected: its own outlined green pill in a heavier weight (not colour alone). */
+.segmented__option input:checked + span {
+  margin: calc(-1 * var(--stroke-control));
+  border-color: var(--line);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 900;
 }
 
-.settings__reset {
-  margin-top: 16px;
-  padding-top: 12px;
-  border-top: 1px solid rgba(31, 111, 91, 0.2);
+.segmented__option input:focus-visible + span {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
 }
 
-.confirm {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-/* Setup */
-.setup__step {
-  margin: 0;
-  color: var(--text-muted);
+/* ---------- Shell: header banner and dock ---------- */
+.banner {
+  margin: 12px 16px 0;
+  padding: 10px 14px;
+  border: var(--stroke-control) solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+  color: var(--text);
+  font-size: 0.9rem;
   font-weight: 700;
 }
 
-.setup__nav {
+.banner--alert {
+  border-color: var(--danger);
+  color: var(--danger);
+}
+
+.banner--warn {
+  margin: 0;
+  background: var(--surface-inset);
+}
+
+.dock {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 4px;
+  margin: 0 12px 8px;
+  padding: 4px;
+  border: var(--stroke-card) solid var(--line);
+  border-radius: 30px;
+  background: var(--surface);
+}
+
+.dock__item {
   display: flex;
-  gap: 8px;
-  margin-top: 8px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 1px;
+  min-width: var(--tap-min);
+  min-height: var(--tap-min);
+  padding: 4px 2px;
+  border: var(--stroke-control) solid transparent;
+  border-radius: 22px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  line-height: 1.1;
+}
+
+.dock__item .glyph {
+  width: 26px;
+}
+
+.dock__item:hover .glyph {
+  transform: translateY(-1px);
+}
+
+.dock__item[aria-current="page"] {
+  border-color: var(--line);
+  background: var(--primary);
+  color: var(--on-primary);
+  font-weight: 900;
+}
+
+/* ---------- Screens ---------- */
+.screen {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.screen__title {
+  font-size: 1.75rem;
+  font-weight: 900;
+  line-height: 1.15;
+  color: var(--text);
+}
+
+.screen__hint {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.section__title {
+  font-size: 1.05rem;
+  font-weight: 900;
+  color: var(--text);
 }

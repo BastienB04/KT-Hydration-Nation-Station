@@ -1,44 +1,91 @@
-/* Design tokens: the whole frog palette lives here (Requirements 3.4). */
+/* Design tokens for Direction C "Playful cards" (Phase 4).
+   Light is the default; dark applies when <html data-theme="dark"> (set by
+   src/theme) or, before any script runs, when the OS prefers dark. The two
+   dark blocks must stay identical (guarded by tokens.test.ts). Character
+   colours never change between themes. Flat sticker look: flat fills only,
+   no blurred shadows (tokens.test.ts). Values: MOCKUPS.md "Decision (7 Nov 2026)". */
 :root {
-  --lily-green: #6bbf59;
-  --deep-pond: #1f6f5b;
-  --pond-blue: #4fa3d1;
-  --sunny-cream: #fff7d6;
-  --dark-pond: #0f2e2a;
-  --blush: #f7a7b8;
-  --fly-black: #2b2b2b;
+  /* Character and object colours (both themes) */
+  --ink: #141414;
+  --ribbit-green: #a6ec66;
+  --ribbit-parched: #d3ecb4;
+  --crown: #ffd54a;
+  --lily: #6bbf59;
+  --blush: #ffb0c8;
+  --white: #ffffff;
 
-  --bg: var(--sunny-cream);
+  /* Semantic tokens, light */
+  color-scheme: light;
+  --page: #fff9e5;
   --surface: #ffffff;
-  --text: var(--fly-black);
-  --text-muted: #5f6b63;
-  --accent: var(--lily-green);
-  --accent-strong: var(--deep-pond);
-  --on-accent-strong: #fff;
-  --water: var(--pond-blue);
+  --surface-inset: #fff9e5;
+  --line: #141414;
+  --text: #141414;
+  --text-muted: #5b635e;
+  --link: #1f6f5b;
+  --focus: #1f6f5b;
+  --primary: #a6ec66;
+  --on-primary: #141414;
+  --drop: #7cccf2;
+  --pond: #cbebfb;
+  --water-strong: #1c6fa3;
+  --heart: #ff6ca8;
+  --danger: #c0303c;
+  --sticker-edge: transparent;
 
-  --radius-s: 10px;
-  --radius-m: 18px;
-  --radius-l: 28px;
-  --shadow: 0 6px 20px rgba(31, 111, 91, 0.12);
+  /* Strokes, radii, layout */
+  --stroke-card: 3.5px;
+  --stroke-control: 2.5px;
+  --stroke-fine: 2px;
+  --radius-card: 24px;
+  --radius-control: 18px;
+  --radius-pill: 999px;
+  --canvas-max: 480px;
+  --tap-min: 44px;
 
+  /* Motion */
   --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);
   --duration-fast: 160ms;
   --duration-slow: 600ms;
+  --bob-duration: 3.2s;
+  --blink-interval: 5s;
 
   --font: "Nunito", "Segoe UI", system-ui, -apple-system, sans-serif;
 }
 
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f2e2a;
+  --surface: #173f3a;
+  --surface-inset: #0f2e2a;
+  --line: #d5e7dc;
+  --text: #f3f8f1;
+  --text-muted: #a9c3b7;
+  --link: #a8e69a;
+  --focus: #a8e69a;
+  --pond: #1d5670;
+  --water-strong: #8fd6ff;
+  --heart: #ff7db3;
+  --danger: #ff8a8a;
+  --sticker-edge: #f3f8f1;
+}
+
+/* No-JS fallback: follow the OS until src/theme sets data-theme. */
 @media (prefers-color-scheme: dark) {
-  :root {
-    --bg: var(--dark-pond);
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --page: #0f2e2a;
     --surface: #173f3a;
-    --text: #f1f7f2;
+    --surface-inset: #0f2e2a;
+    --line: #d5e7dc;
+    --text: #f3f8f1;
     --text-muted: #a9c3b7;
-    --accent: #7fd36c;
-    --accent-strong: #a8e69a;
-    --on-accent-strong: var(--dark-pond);
-    --water: #5fb3e0;
-    --shadow: 0 6px 20px rgba(0, 0, 0, 0.35);
+    --link: #a8e69a;
+    --focus: #a8e69a;
+    --pond: #1d5670;
+    --water-strong: #8fd6ff;
+    --heart: #ff7db3;
+    --danger: #ff8a8a;
+    --sticker-edge: #f3f8f1;
   }
 }

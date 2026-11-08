@@ -1,11 +1,15 @@
 /**
- * Quick-add buttons, a validated custom-amount field and undo. Announces each
- * action in a polite live region for screen readers.
+ * "Log a sip" card: three quick-add buttons, a validated custom-amount field
+ * and undo. Announces each action in a polite live region for screen readers.
  */
 import { useId, useState } from "react";
 import { parseAmount } from "../core/settings";
 import { todayEntries } from "../core/stats";
 import { useController, useData } from "../state/AppContext";
+import { Glyph } from "./Glyph";
+
+/** Drop glyph size by button position: small, medium, large. */
+const DROP_SIZES = ["sip-btn__drop--s", "sip-btn__drop--m", "sip-btn__drop--l"];
 
 export function QuickAdd({ hasEntriesToday }: { hasEntriesToday: boolean }) {
   const controller = useController();
@@ -39,47 +43,62 @@ export function QuickAdd({ hasEntriesToday }: { hasEntriesToday: boolean }) {
   }
 
   return (
-    <section className="quick-add" aria-labelledby={`${errorId}-h`}>
-      <h3 id={`${errorId}-h`} className="section__title">
+    <section className="card quick-card" aria-labelledby={`${errorId}-h`}>
+      <h3 id={`${errorId}-h`} className="card__title">
         Log a sip
       </h3>
-      <div className="quick-add__buttons">
+      <div className="quick-card__buttons">
         {data.settings.quickAddMl.map((ml, i) => (
-          <button key={i} type="button" className="btn btn--primary" onClick={() => log(ml)}>
-            +{ml} ml
+          <button
+            key={i}
+            type="button"
+            className="btn sip-btn"
+            aria-label={`+${ml} ml`}
+            onClick={() => log(ml)}
+          >
+            <Glyph name="prop/water-drop" className={`sip-btn__drop ${DROP_SIZES[i] ?? DROP_SIZES[1]}`} />
+            <span>+{ml}</span>
           </button>
         ))}
       </div>
 
-      <form className="quick-add__custom" onSubmit={onSubmit} noValidate>
-        <label htmlFor={`${errorId}-input`}>Custom amount (ml)</label>
-        <div className="quick-add__custom-row">
-          <input
-            id={`${errorId}-input`}
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={5000}
-            step={1}
-            value={custom}
-            onChange={(e) => setCustom(e.target.value)}
-            aria-invalid={error ? true : undefined}
-            aria-describedby={error ? errorId : undefined}
-          />
-          <button type="submit" className="btn">
-            Add
-          </button>
-        </div>
-        {error && (
-          <p id={errorId} className="field-error" role="alert">
-            {error}
-          </p>
-        )}
+      <form className="quick-card__custom" onSubmit={onSubmit} noValidate>
+        <label htmlFor={`${errorId}-input`} className="visually-hidden">
+          Custom amount (ml)
+        </label>
+        <input
+          id={`${errorId}-input`}
+          className="input quick-card__input"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={5000}
+          step={1}
+          placeholder="Custom ml"
+          value={custom}
+          onChange={(e) => setCustom(e.target.value)}
+          aria-invalid={error ? true : undefined}
+          aria-describedby={error ? errorId : undefined}
+        />
+        <button type="submit" className="btn btn--small">
+          Add
+        </button>
+        <button
+          type="button"
+          className="btn btn--small btn--ghost quick-card__undo"
+          aria-label="Undo last sip"
+          onClick={undo}
+          disabled={!hasEntriesToday}
+        >
+          <Glyph name="icon/undo" />
+          <span>Undo</span>
+        </button>
       </form>
-
-      <button type="button" className="btn btn--ghost" onClick={undo} disabled={!hasEntriesToday}>
-        Undo last sip
-      </button>
+      {error && (
+        <p id={errorId} className="field-error" role="alert">
+          {error}
+        </p>
+      )}
 
       <p className="visually-hidden" role="status" aria-live="polite">
         {announce}

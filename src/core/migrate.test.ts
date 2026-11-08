@@ -88,4 +88,63 @@ describe("migrate", () => {
     expect(data.schemaVersion).toBe(1);
     expect(data.settings.dailyGoalMl).toBe(2200);
   });
+  describe("Phase 4 theme field (schemaVersion stays 1)", () => {
+    // Exactly what a Phase 3 build writes today: 11 settings keys, no theme.
+    function phase3Store() {
+      return {
+        schemaVersion: 1,
+        settings: {
+          dailyGoalMl: 2500,
+          quickAddMl: [100, 250, 400],
+          reminderEveryMin: 45,
+          activeHours: { start: "07:30", end: "21:00" },
+          activeDays: [1, 2, 3, 4, 5],
+          snoozeMin: 15,
+          soundEnabled: false,
+          launchAtLogin: false,
+          checkUpdates: false,
+          frogName: "Hopkins",
+          setupDone: true,
+        },
+        state: {
+          lastReminderAt: "2026-11-04T13:00:00.000Z",
+          lastDrinkAt: "2026-11-04T12:40:00.000Z",
+          pausedUntil: "2026-11-04T15:00:00.000Z",
+          tipIndex: 7,
+          lastCelebratedDate: "2026-11-03",
+        },
+        log: {
+          "2026-11-03": [
+            { t: "2026-11-03T08:10:00.000Z", ml: 400 },
+            { t: "2026-11-03T12:00:00.000Z", ml: 250 },
+          ],
+          "2026-11-04": [{ t: "2026-11-04T12:40:00.000Z", ml: 100 }],
+        },
+      };
+    }
+    it("migrates the exact current v1 store by only adding theme: system", () => {
+      const input = phase3Store();
+      const snapshot = JSON.parse(JSON.stringify(input));
+      const { data, changed } = migrate(input);
+      expect(changed).toBe(true);
+      expect(data.schemaVersion).toBe(1);
+      expect(data).toEqual({ ...snapshot, settings: { ...snapshot.settings, theme: "system" } });
+      expect(input).toEqual(snapshot);
+    });
+    it("replaces malformed theme values with system", () => {
+      for (const theme of ["Dark", 1, null, {}, "auto"]) {
+        const input = phase3Store();
+        const { data, changed } = migrate({ ...input, settings: { ...input.settings, theme } });
+        expect(data.settings.theme).toBe("system");
+        expect(changed).toBe(true);
+      }
+    });
+    it("round-trips a valid dark theme with changed=false", () => {
+      const input = phase3Store();
+      const stored = JSON.parse(JSON.stringify({ ...input, settings: { ...input.settings, theme: "dark" } }));
+      const { data, changed } = migrate(stored);
+      expect(changed).toBe(false);
+      expect(data.settings.theme).toBe("dark");
+    });
+  });
 });

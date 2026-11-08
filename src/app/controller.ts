@@ -1,11 +1,12 @@
 /**
  * Wires the pure store to a platform: it saves on every data change, refreshes
- * the tray tooltip, celebrates once a day, and runs the scheduler on ticks,
+ * the tray tooltip and due icon, celebrates once a day, and runs the scheduler on ticks,
  * wakes, tray actions and relevant state changes. The scheduler and store stay
  * pure; all side effects live here.
  */
+import { reminderUnanswered } from "../core/attention";
 import { buildTooltip } from "../core/format";
-import type { ActiveHours, Settings } from "../core/schema";
+import type { ActiveHours, Settings, ThemeMode } from "../core/schema";
 import { evaluate as schedulerEvaluate, restOfDayUntil } from "../core/scheduler";
 import { todayKey, todayTotal } from "../core/stats";
 import { tipAt } from "../core/tips";
@@ -34,7 +35,10 @@ export interface Controller {
   pauseRestOfDay(): void;
   resume(): void;
   nextTip(): void;
-  saveSettings(settings: Settings): Promise<{ ok: true } | { ok: false; error: string }>;
+  /** Change the theme immediately (live preview); persisted like any data change. */
+  setTheme(mode: ThemeMode): void;
+  /** Save the Settings form. The stored theme is kept: only `setTheme` changes it. */
+  saveSettings(settings: Omit<Settings, "theme">): Promise<{ ok: true } | { ok: false; error: string }>;
   completeSetup(values: { dailyGoalMl: number; activeHours: ActiveHours; frogName: string }): Promise<void>;
   reset(): void;
 }
@@ -60,6 +64,7 @@ export function createController(options: ControllerOptions): Controller {
 
   let lastRoot = store.getState();
   let lastTooltip: string | null = null;
+  let lastAttention: boolean | null = null;
   let firing = false;
   let disposed = false;
   let storeUnsub: (() => void) | null = null;
@@ -89,6 +94,28 @@ export function createController(options: ControllerOptions): Controller {
     }
   }
 
+  async function refreshAttention(): Promise<void> {
+    const due = reminderUnanswered(store.getState().data, now());
+    if (due === lastAttention) return;
+    lastAttention = due;
+    try {
+      await platform.tray.setAttention(due);
+    } catch {
+      // Tray icon is best-effort.
+    }
+  }
+
+  /**
+   * Update the tray tooltip and due icon, each only when it changed. The icon
+   * update is fire-and-forget so evaluate() holds its `firing` guard no longer
+   * than in Phase 3 (a longer hold makes an overlapping tick skip its fire);
+   * refreshAttention records the new value synchronously, so dedupe holds.
+   */
+  function refreshTray(): Promise<void> {
+    void refreshAttention();
+    return refreshTooltip();
+  }
+
   function maybeCelebrate(): void {
     const data = store.getState().data;
     if (!data.settings.setupDone) return;
@@ -109,7 +136,7 @@ export function createController(options: ControllerOptions): Controller {
     lastRoot = root;
     if (root.data !== prev.data) {
       saveQueue.schedule(root.data);
-      void refreshTooltip();
+      void refreshTray();
       maybeCelebrate();
       if (
         root.data.settings !== prev.data.settings ||
@@ -135,7 +162,7 @@ export function createController(options: ControllerOptions): Controller {
         store.dispatch({ type: "setNotificationsBlocked", blocked: !sent });
         if (data.settings.soundEnabled) platform.sound.ribbit();
       }
-      await refreshTooltip();
+      await refreshTray();
     } finally {
       firing = false;
     }
@@ -233,9 +260,15 @@ export function createController(options: ControllerOptions): Controller {
       store.dispatch({ type: "nextTip" });
     },
 
-    async saveSettings(settings: Settings) {
+    setTheme(mode: ThemeMode) {
+      store.dispatch({ type: "setTheme", theme: mode });
+    },
+    async saveSettings(settings: Omit<Settings, "theme">) {
       const prev = store.getState().data.settings;
-      store.dispatch({ type: "updateSettings", settings });
+      store.dispatch({
+        type: "updateSettings",
+        settings: { ...settings, theme: store.getState().data.settings.theme },
+      });
       if (platform.autostart.supported && settings.launchAtLogin !== prev.launchAtLogin) {
         try {
           await platform.autostart.setEnabled(settings.launchAtLogin);

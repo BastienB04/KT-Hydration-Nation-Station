@@ -98,6 +98,9 @@ export function createTauriPlatform(): Platform & { dispose(): void } {
       async setTooltip(text: string) {
         await invoke("set_tray_tooltip", { text });
       },
+      async setAttention(due: boolean) {
+        await invoke("set_tray_attention", { due });
+      },
     },
     events: {
       async onTick(cb) {

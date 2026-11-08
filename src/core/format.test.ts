@@ -1,5 +1,12 @@
 import { describe, expect, it } from "vitest";
-import { buildTooltip, formatClock, formatDayLabel, formatMl } from "./format";
+import {
+  buildTooltip,
+  formatClock,
+  formatDayLabel,
+  formatDayLong,
+  formatMl,
+  formatWeekdayShort,
+} from "./format";
 import type { Decision } from "./scheduler";
 
 describe("formatMl", () => {
@@ -22,6 +29,20 @@ describe("formatDayLabel", () => {
   });
 });
 
+describe("formatWeekdayShort", () => {
+  it("gives the short weekday name for a local date key", () => {
+    expect(formatWeekdayShort("2026-11-03")).toBe("Tue");
+    expect(formatWeekdayShort("2026-11-08")).toBe("Sun");
+    expect(formatWeekdayShort("2026-10-25")).toBe("Sun"); // DST change day
+  });
+});
+
+describe("formatDayLong", () => {
+  it("gives the full weekday, day and short month", () => {
+    expect(formatDayLong("2026-11-03")).toBe("Tuesday 3 Nov");
+    expect(formatDayLong("2026-10-25")).toBe("Sunday 25 Oct");
+  });
+});
 describe("buildTooltip", () => {
   const due = new Date(2026, 10, 4, 14, 30).getTime();
 

@@ -1,0 +1,127 @@
+/* Ribbit and glyph rendering: sizes, the dark sticker edge (STYLE_GUIDE rule
+   11), idle bob and blink, and the reduced-motion fallback. */
+.ribbit-art,
+.glyph {
+  display: inline-block;
+  flex: none;
+  line-height: 0;
+}
+
+.ribbit-art svg,
+.glyph svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* Glyph and full art may draw their sticker edge just outside the box. */
+.glyph svg,
+.ribbit-art--full svg {
+  overflow: visible;
+}
+
+.ribbit-art--full {
+  width: 200px;
+}
+
+/* Peek: head and chest (viewBox 312 x 270 of the 512 box, cut at y 366 just
+   below the mouth). Only the bottom is cut, so raised arms and a held drop
+   (celebrate, wave, reminder) may reach past the sides and top. Floating
+   extras would look cropped, so they are hidden. */
+.ribbit-art--peek {
+  width: 118px;
+}
+
+.ribbit-art--peek svg {
+  overflow: visible;
+  clip-path: inset(-60% -60% 0 -60%);
+}
+
+.ribbit-art--peek .float {
+  display: none;
+}
+
+.ribbit-art--thumb {
+  width: 40px;
+}
+
+.ribbit-art--thumb .float {
+  display: none;
+}
+
+.glyph--nav {
+  width: 28px;
+}
+
+.glyph--prop {
+  width: 24px;
+}
+
+.glyph--icon {
+  width: 20px;
+}
+
+/* Sticker edge: the duplicated art behind the real art, drawn as one thick
+   silhouette. Every part inherits the group's stroke-width attribute. */
+.sticker-edge,
+.sticker-edge * {
+  fill: var(--sticker-edge);
+  stroke: var(--sticker-edge);
+  stroke-linejoin: round;
+  stroke-linecap: round;
+}
+
+.sticker-edge * {
+  stroke-width: inherit;
+}
+
+/* Idle motion: a gentle bob for the calm, happy poses ... */
+.ribbit-art--animate.ribbit-art--content,
+.ribbit-art--animate.ribbit-art--happy,
+.ribbit-art--animate.ribbit-art--hydrated {
+  animation: ribbit-bob var(--bob-duration) ease-in-out infinite;
+}
+
+/* ... and a blink for every pose with open dot eyes. */
+.ribbit-art--animate.ribbit-art--base .eyes,
+.ribbit-art--animate.ribbit-art--content .eyes,
+.ribbit-art--animate.ribbit-art--happy .eyes,
+.ribbit-art--animate.ribbit-art--hydrated .eyes,
+.ribbit-art--animate.ribbit-art--reminder .eyes,
+.ribbit-art--animate.ribbit-art--wave .eyes,
+.ribbit-art--animate.ribbit-art--celebrate .eyes {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: ribbit-blink var(--blink-interval) linear infinite;
+}
+
+@keyframes ribbit-bob {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-3px);
+  }
+}
+
+/* About 120 ms closed every 5 s. */
+@keyframes ribbit-blink {
+  0%,
+  95.6%,
+  100% {
+    transform: scaleY(1);
+  }
+  96.8% {
+    transform: scaleY(0.1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ribbit-art,
+  .ribbit-art *,
+  .burst,
+  .burst * {
+    animation: none !important;
+  }
+}

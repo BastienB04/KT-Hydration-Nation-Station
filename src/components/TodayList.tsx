@@ -1,14 +1,19 @@
 /**
- * Today's sips, with inline edit and delete. Focus returns to a sensible place
- * after a delete or a cancelled edit so keyboard users keep their place.
+ * Today's sips, newest first, collapsed to the newest COLLAPSED_COUNT with a
+ * "Show all" toggle, plus inline edit and delete. Rows keep each entry's
+ * original array index, which is what editEntry/deleteEntry expect. Focus
+ * returns to the heading after a delete so keyboard users keep their place.
  */
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import { formatClock, formatMl } from "../core/format";
 import type { Entry } from "../core/schema";
 import { parseAmount } from "../core/settings";
 import { todayKey } from "../core/stats";
 import { parseIso } from "../core/time";
 import { useController, useData } from "../state/AppContext";
+import { Glyph } from "./Glyph";
+
+export const COLLAPSED_COUNT = 3;
 
 export function TodayList() {
   const controller = useController();
@@ -18,7 +23,9 @@ export function TodayList() {
   const [editing, setEditing] = useState<number | null>(null);
   const [draft, setDraft] = useState("");
   const [error, setError] = useState<string | null>(null);
+  const [expanded, setExpanded] = useState(false);
   const headingRef = useRef<HTMLHeadingElement>(null);
+  const listId = useId();
 
   function startEdit(index: number, entry: Entry) {
     setEditing(index);
@@ -46,23 +53,41 @@ export function TodayList() {
     headingRef.current?.focus();
   }
 
+  // Newest first, each row remembering its index in the stored (oldest-first) array.
+  const rows = entries.map((entry, index) => ({ entry, index })).reverse();
+  const collapsible = rows.length > COLLAPSED_COUNT;
+  const visible = collapsible && !expanded ? rows.slice(0, COLLAPSED_COUNT) : rows;
+
   return (
-    <section className="today">
-      <h3 className="section__title" tabIndex={-1} ref={headingRef}>
-        Today's sips
-      </h3>
+    <section className="card sips-card">
+      <div className="sips-card__head">
+        <h3 className="card__title" tabIndex={-1} ref={headingRef}>
+          Today's sips
+        </h3>
+        {collapsible && (
+          <button
+            type="button"
+            className="btn btn--small btn--ghost sips-card__toggle"
+            aria-expanded={expanded}
+            aria-controls={listId}
+            onClick={() => setExpanded((x) => !x)}
+          >
+            {expanded ? "Show fewer" : `${rows.length} sips · Show all`}
+          </button>
+        )}
+      </div>
       {entries.length === 0 ? (
         <p className="screen__hint">No sips logged yet. Ribbit is waiting patiently.</p>
       ) : (
-        <ul className="today__list">
-          {entries.map((entry, index) => {
+        <ul id={listId} className="sips-card__list">
+          {visible.map(({ entry, index }) => {
             const ms = parseIso(entry.t) ?? Date.now();
             const time = formatClock(ms);
             return (
-              <li key={entry.t} className="today__row">
+              <li key={entry.t} className="sips-card__row">
                 {editing === index ? (
                   <form
-                    className="today__edit"
+                    className="sips-card__edit"
                     onSubmit={(e) => {
                       e.preventDefault();
                       saveEdit(index, entry);
@@ -72,6 +97,7 @@ export function TodayList() {
                     <label htmlFor={`edit-${index}`}>Amount (ml) at {time}</label>
                     <input
                       id={`edit-${index}`}
+                      className="input sips-card__edit-input"
                       type="number"
                       inputMode="numeric"
                       min={1}
@@ -97,22 +123,24 @@ export function TodayList() {
                   </form>
                 ) : (
                   <>
-                    <span className="today__time">{time}</span>
-                    <span className="today__amount">{formatMl(entry.ml)} ml</span>
+                    <Glyph name="prop/water-drop" className="sips-card__drop" />
+                    <span className="sips-card__time">{time}</span>
+                    <span className="sips-card__amount">{formatMl(entry.ml)} ml</span>
                     <button
                       type="button"
-                      className="btn btn--small btn--ghost"
+                      className="btn btn--icon"
+                      aria-label={`Edit ${entry.ml} ml at ${time}`}
                       onClick={() => startEdit(index, entry)}
                     >
-                      Edit
+                      <Glyph name="icon/pencil" />
                     </button>
                     <button
                       type="button"
-                      className="btn btn--small btn--ghost"
+                      className="btn btn--icon"
                       aria-label={`Delete ${entry.ml} ml at ${time}`}
                       onClick={() => remove(index, entry)}
                     >
-                      Delete
+                      <Glyph name="icon/x" />
                     </button>
                   </>
                 )}
