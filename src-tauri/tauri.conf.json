@@ -48,7 +48,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDVGMDlGNEIyN0ZFREVENEEKUldSSzdlMS9zdlFKWHoyTTNaVHpyK1JhRmtUcnlTdFpIVG5USGZ5NDRMb3REd1RxNG04V2RDTFUK",
       "endpoints": [
         "https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest/download/latest.json"
       ],
