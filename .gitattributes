@@ -1,0 +1,2 @@
+# Keep reviewed release notes identical across Windows and Linux checkouts.
+docs/releases/*.md text eol=lf
