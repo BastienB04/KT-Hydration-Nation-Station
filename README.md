@@ -8,8 +8,11 @@ Ribbit is a cartoon frog that reminds you to drink water. Log a quick sip or a c
 
 You need a **64-bit Intel or AMD PC (x64)** with **Windows 11** or **Windows 10 21H2 or later**. Physical testing passed on Windows 11 Home 25H2; Windows 10 is an intended compatibility target that has not been physically validated. ARM64 and 32-bit installers are not provided.
 
-1. [Download the Windows installer](https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest/download/KT-Hydration-Nation-Station-setup.exe). Downloads become available when the first public release is published. You can also use the [Releases page](https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest).
-2. Open `KT-Hydration-Nation-Station-setup.exe`. The Releases page also has the same installer under its versioned name, such as `KT-Hydration-Nation-Station_0.1.0_x64-setup.exe`.
+1. [Download the Windows installer](https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest/download/KT-Hydration-Nation-Station-setup.exe). You can also use the [Releases page](https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest).
+
+   Microsoft Edge may say this installer **“isn't commonly downloaded.”** Confirm it came from this project's official Release, open **Downloads** with **Ctrl+J**, and choose the file's **… → Keep**. In the next prompt, choose **Show more → Keep anyway**, or open the **down arrow beside Delete → Keep anyway**, depending on the options shown. This is a browser reputation warning and can appear in addition to the Windows warning below. **Report this file as safe** sends feedback to Microsoft; use **Keep** to retain your download. Keep SmartScreen and Defender enabled. You can optionally [verify the download's SHA-256](#optional-download-verification) before opening it.
+
+2. Open `KT-Hydration-Nation-Station-setup.exe`. The Releases page also has the same installer under its versioned name, such as `KT-Hydration-Nation-Station_0.1.1_x64-setup.exe`.
 3. If SmartScreen shows **Windows protected your PC / Unknown publisher**, confirm you downloaded this project's official Release, choose **More info → Run anyway**, and continue. The installer has no Authenticode signature. **Keep SmartScreen and Defender enabled.**
 4. Follow the installer, then open Ribbit. The app installs for your Windows account; **no administrator password or UAC elevation is expected for the app**. Existing Microsoft WebView2 is reused; if missing, the installer downloads Microsoft's Evergreen runtime, so stay online.
 5. Pick your daily goal, active hours and frog name. Ribbit is then ready.

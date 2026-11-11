@@ -123,7 +123,7 @@ Non-goals (v1)
 | ID | Requirement |
 |---|---|
 | N-01 | Installer ≤ 15 MB; idle RAM ≤ 80 MB; cold start ≤ 2 s on the laptop. |
-| N-02 | Works fully offline. The only network call is the update check to `github.com`, and it can be disabled in Settings. |
+| N-02 | All hydration features work offline. Optional update checks and user-approved downloads contact GitHub; automatic checks can be disabled in Settings. |
 | N-03 | No telemetry, no accounts, no remote content. Data lives in `%APPDATA%\<identifier>\store.json` and survives updates. |
 | N-04 | Reminders keep working while the window is hidden, after the laptop sleeps and wakes, and after a reboot (via launch at login). No burst of catch-up reminders after sleep: at most one. |
 | N-05 | Per-user install (no admin rights), uninstall from Windows Settings like any app. |
@@ -133,26 +133,26 @@ Non-goals (v1)
 
 ### 3.7 Distribution and install requirements
 
-- **Developer flow**: commit on the Mac → `git push` → tag `vX.Y.Z` → GitHub Actions builds on `windows-latest` → GitHub Release with `KT-Hydration-Nation-Station_X.Y.Z_x64-setup.exe`, its `.sig`, and `latest.json`.
+- **Developer flow**: validate/review and commit locally → separately approved source push → Windows build-check passes → separately approved `vX.Y.Z` tag push/publication → GitHub Actions builds on `windows-latest` and publishes the versioned x64 installer, its `.sig`, stable download alias, `latest.json` and `SHA256SUMS.txt`. Ordinary source pushes do not publish.
 - **End-user flow** (README "Install" section, written for a non-developer):
   1. Open the repo's Releases page (or the permalink in the README) and download the `-setup.exe`.
-  2. Edge may ask to "Keep" the download; Windows SmartScreen shows "Windows protected your PC" → **More info** → **Run anyway**. This appears once, because the installer is not code-signed.
-  3. The installer runs per-user and finishes in seconds; the app opens to the first-run setup.
-  4. Updates are automatic from then on; no SmartScreen prompt for updates installed by the app.
+  2. Edge may require **Keep → Keep anyway** for its download warning; see the maintained README for the prompt variations. If Windows SmartScreen shows "Windows protected your PC" for this official unsigned installer, choose **More info → Run anyway**. Keep SmartScreen and Defender enabled; updater signing does not remove publisher/reputation warnings.
+  3. The installer runs per-user with no app administrator elevation expected. A fresh data-free installation opens to first-run setup; a reinstall with retained completed-Setup data opens Pond.
+  4. Update checks run at launch and every six hours when enabled. The user chooses **Download update**, then **Restart now** or **Later**; nothing installs until Restart now. Signed updates preserve settings/history.
 - **Build from source** (fallback section in the README for the curious): install Rust (rustup), Visual Studio Build Tools with "Desktop development with C++", Node LTS; `git clone`, `npm install`, `npm run tauri dev` or `npm run tauri build`. Not the primary path.
 - Later options, in order of ease, if the app outgrows two users: a one-page download site on GitHub Pages; winget manifest (`winget install`); Microsoft Store (free individual account, removes SmartScreen, Store handles updates). All free.
 
 ### 3.8 Acceptance criteria (v1 definition of done)
 
-Verified in the Windows VM and then on the real laptop:
+Validate on a physical Windows x64 laptop. Phase 5 used a physical laptop instead of the originally planned VM; record each actual result without assuming unseen-machine compatibility:
 
-1. Fresh install from the Release link succeeds with only the SmartScreen click-through; the app opens to first-run setup.
+1. Fresh install from the Release link succeeds after any Edge **Keep → Keep anyway** and SmartScreen **More info → Run anyway** confirmations, without app administrator elevation; the app opens to first-run setup.
 2. Logging 250 ml updates the pond level, the numbers, the frog state and the tray tooltip within one second; undo removes it; data persists across app restart and laptop reboot.
 3. With interval set to 1 minute and the window hidden to tray, a toast with a tip appears within the interval; the ribbit plays when sound is on; no toast arrives once the goal is met, outside active hours, or while paused/snoozed.
-4. Put the VM to sleep for 10 minutes past a due reminder and wake it: exactly one reminder fires.
+4. Put the Windows laptop to sleep for 10 minutes past a due reminder and wake it: exactly one reminder fires.
 5. Closing the window hides it; left-clicking the tray icon restores it; "Quit" exits; relaunching while running focuses the existing window.
 6. "Launch at login" on → sign out/in → the app is in the tray without a window.
-7. Release v0.1.1 with a visible change → the installed v0.1.0 offers the update on launch, installs it, and the data is intact.
+7. After separately approved publication of v0.1.1 with a visible change, installed v0.1.0 offers the update on launch when checks are enabled. The user chooses **Download update**, verifies **Later** keeps the current app usable, then chooses **Restart now**; the new version/change and dated settings/history are intact.
 8. Light and dark Windows themes both render correctly at 100 % and 150 % scaling.
 9. Uninstall from Windows Settings removes the app (data folder removal is a checkbox in the uninstaller).
 
@@ -577,16 +577,16 @@ Effort is in Kiro working sessions of roughly 1–3 hours. Each step ends with a
 30. Fix findings on the Mac, push, re-test from the snapshot. If the x64 build won't start under emulation, add a `windows-11-arm` job with `--target aarch64-pc-windows-msvc` for VM builds only.
 
 ### Phase 6: Release pipeline and v0.1.0 (1 session)
-31. Generate updater keys (4.9); store private key + password in your password manager; add both GitHub secrets; put the public key in `tauri.conf.json`.
-32. Add `release.yml`; set workflow permissions to read/write.
-33. Updater UI (`core/updater.ts`): check on launch and every 6 h, frog bubble, "Update now".
-34. README: install steps from 3.7 with screenshots of the SmartScreen dialog, FAQ (no toasts? check Focus Assist), build-from-source section, licence.
-35. Set `version` 0.1.0 → commit → `git tag v0.1.0` → push tag. Verify the Release exists with `-setup.exe`, `.sig`, `latest.json`.
-36. In the VM (from the clean snapshot): install v0.1.0 from the Release link exactly as the README says. Criterion 1 passes.
+31. Completed signing setup: private key/password backed up outside the repo, both Actions secrets configured, public key in `tauri.conf.json`. Generation, rotation and secret changes require separate explicit approval; reuse the existing key for routine releases.
+32. Completed `release.yml`: default/build **contents: read**, publisher job only **contents: write**; no repository-wide write-permission change.
+33. Completed updater UI (`app/updates.ts` and About/Pond controls): check on launch and every 6 h when enabled; **Download update**, then **Restart now** or **Later**.
+34. Maintained README: install steps from 3.7, Edge/SmartScreen warnings, Do Not Disturb and live-toast limitations, recovery, build-from-source and licences.
+35. v0.1.0 was validated, reviewed, pushed, tagged and published after explicit approvals. Keep its existing tag/body/assets unchanged; later versions repeat the separate source-push and tag/publication gates.
+36. Public downloads/signatures/metadata were independently verified; the public installation/runtime baseline then passed on the available physical Windows x64 laptop. The originally planned clean VM was not used.
 
 ### Phase 7: Real laptop and first update (~30 min + waiting)
-37. On the laptop: follow the README only (no help), note every point of friction, fix the README.
-38. Make a visible change, release v0.1.1; confirm the laptop's app offers and installs the update with data intact (criterion 7). v1 is done.
+37. Pre-presentation tests use the available Phase 5 physical laptop; the unseen first-user machine is available only at presentation. The public v0.1.0 install/runtime/update-check baseline passed by user report on 2026-11-11, with three entries [250, 125, 250]/625 ml, recorded settings and a backup. Preserve this fixture and correct README friction.
+38. Prepare the separately approved visible v0.1.1 change, validate/review and commit locally; obtain separate source-push approval, pass Windows CI/artifact inspection, then obtain separate tag/publication approval. Confirm the real in-app update, signature verification, Later/Restart now, preserved dated data/settings and safe failure recovery before completing Phase 7. Follow [the maintained deployment procedure](Release_and_Recovery.md#phase-7-deployment-and-first-update); the unseen first install remains a presentation-time check.
 
 ### Phase 8: v1.1 backlog (as wanted)
 39. In-app reminder popup (F-18), global hotkey (F-17), end-of-day summary, CSV export, weekly stats; then the fun extras from 3.5.
@@ -599,10 +599,10 @@ Total for v1: about 7–9 Kiro sessions plus the Windows download/VM setup time.
 
 > **Install KT-Hydration-Nation-Station on Windows**
 > 1. Download `KT-Hydration-Nation-Station_<version>_x64-setup.exe` from the [latest release](https://github.com/BastienB04/KT-Hydration-Nation-Station/releases/latest).
-> 2. If Edge asks, choose **Keep**. When Windows shows "Windows protected your PC", click **More info**, then **Run anyway**. You'll see this once; KT-Hydration-Nation-Station is a free hobby app and isn't signed with a paid certificate.
+> 2. If Edge warns about the download, choose **Keep → Keep anyway** using the prompt variation in the [maintained README](../README.md#install-on-windows). If Windows shows "Windows protected your PC" for the official download, click **More info → Run anyway**. The installer is not Authenticode-signed; keep SmartScreen and Defender enabled.
 > 3. The installer takes a few seconds and needs no admin rights. KT-Hydration-Nation-Station opens and asks for your daily goal, your active hours and your frog's name.
 > 4. Closing the window keeps KT-Hydration-Nation-Station in the tray (bottom-right, near the clock). Right-click the frog for Pause and Quit. It starts with Windows by default; change that in Settings.
-> 5. Updates install themselves. If a reminder never arrives, check Windows **Settings → System → Notifications** and **Focus assist**.
+> 5. Update checks are automatic when enabled; choose **Download update**, then **Restart now** or **Later**. If a reminder never arrives, check Windows **Settings → System → Notifications** and **Do Not Disturb**. See the README for live-toast/Notification Center limitations and recovery.
 >
 > **Uninstall**: Windows Settings → Apps → KT-Hydration-Nation-Station → Uninstall.
 

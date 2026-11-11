@@ -20,7 +20,7 @@ export function About() {
           KT-Hydration-Nation-Station
         </h3>
         <p className="about-card__version">Version {APP_VERSION}</p>
-        <p>A cartoon frog that reminds you to drink water.</p>
+        <p>A friendly frog for daily sips and hydration tracking.</p>
         <p className="about-card__note">{FLUID_DISCLAIMER}</p>
       </section>
 

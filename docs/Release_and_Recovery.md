@@ -1,10 +1,10 @@
 # Release and recovery
 
-This is the maintainer procedure for the Windows x64 GitHub Release. End users need only the [README](../README.md). Publication is not implied by local Phase 6 approval.
+This is the maintainer procedure for the Windows x64 GitHub Release. End users need only the [README](../README.md). Publication is not implied by approval for local preparation.
 
 ## Approval boundaries
 
-Local implementation, dependency integration, validation and reviewed local commits may proceed after Phase 6 approval. Obtain **separate explicit approval** before:
+Local implementation, validation and reviewed local commits may proceed for the version and scope explicitly approved by the user. Obtain **separate explicit approval** before:
 
 - generating the production signing key;
 - creating GitHub secrets or changing repository/Actions permissions;
@@ -39,6 +39,8 @@ Primary references:
 - [tauri-action at the inspected immutable revision](https://github.com/tauri-apps/tauri-action/tree/1deb371b0cd8bd54025b384f1cd735e725c4060f)
 
 ## Production signing key — only after separate approval
+
+The production key, public key and both Actions secrets are already configured. Reuse them for v0.1.1; generating or replacing a key is not a routine release step. The setup instructions below apply only to separately approved initial setup or recovery.
 
 The private key belongs **outside the repository**, at `~/.tauri/kt-hns.key`. Its password and a backup of the full key file belong in the user's password manager. The public `.pub` file is safe to read and commit into `tauri.conf.json`.
 
@@ -81,17 +83,17 @@ The Windows job tests the app and verifier, builds native `x86_64-pc-windows-msv
 
 The publisher re-verifies the transferred assets, checks that the public repository's remote tag still identifies the built commit, refuses an existing Release, and refuses to replace a newer/equal latest version. It uses `gh release create --verify-tag`, with no clobber/delete/replacement command. Public HTTPS downloads are then checked anonymously against the verified local hashes.
 
-Expected **v0.1.0** public assets:
+Expected **v0.1.1** public assets, after separately approved publication:
 
 | Asset | Purpose |
 |---|---|
-| `KT-Hydration-Nation-Station_0.1.0_x64-setup.exe` | Per-user installer and updater payload |
-| `KT-Hydration-Nation-Station_0.1.0_x64-setup.exe.sig` | Public updater signature |
+| `KT-Hydration-Nation-Station_0.1.1_x64-setup.exe` | Per-user installer and updater payload |
+| `KT-Hydration-Nation-Station_0.1.1_x64-setup.exe.sig` | Public updater signature |
 | `KT-Hydration-Nation-Station-setup.exe` | Byte-identical stable download alias |
 | `latest.json` | Windows x64 updater feed with inline signature |
 | `SHA256SUMS.txt` | Optional public download hashes |
 
-No ZIP is needed with Tauri 2 `createUpdaterArtifacts: true`. The updater references the versioned installer; the README's stable URL uses the alias. Release title: **KT-Hydration-Nation-Station v0.1.0**. Exact first-release body: [`releases/v0.1.0.md`](releases/v0.1.0.md).
+No ZIP is needed with Tauri 2 `createUpdaterArtifacts: true`. The updater references the versioned installer; the README's stable URL uses the alias. Planned release title: **KT-Hydration-Nation-Station v0.1.1**. Exact proposed body: [`releases/v0.1.1.md`](releases/v0.1.1.md). Keep the published [v0.1.0 body](releases/v0.1.0.md), tag and assets unchanged.
 
 ## Required validation before publication
 
@@ -120,14 +122,16 @@ All signing, Windows CI and public download evidence must be recorded as actual 
 
 **Interrupted publication:** inspect the workflow, Release state and public assets read-only. Do not automatically rerun a mutating publisher, delete a Release, overwrite signatures, retag or change the latest feed. Ask for explicit approval for the concrete recovery action. A post-publication download-check failure does not mean nothing was published.
 
-## Phase 7 clean deployment test
+## Phase 7 deployment and first update
 
-Keep the second personal Windows laptop untouched until v0.1.0 is publicly published and downloads are anonymously verified.
+The never-before-seen first-user laptop is available only at presentation. Pre-presentation validation uses the physical Phase 5 Windows laptop, which was uninstalled with its application data removed before the public v0.1.0 install.
 
-1. Install using only the README and public download, without developer tooling or the Mac.
-2. Confirm first setup, Pond/history/settings/theme, tray, reminders/live-toast activation, sound and login startup.
-3. Save identifiable settings and hydration entries, quit/reopen and record them.
-4. Separately approve a harmless visible v0.1.1 change, full validation, source push, tag and publication.
-5. Update v0.1.0 → v0.1.1 through the app: check, download/progress/verification, Later, then Restart now.
-6. Confirm signature validation, visible new version/change, preserved history/settings and tray/autostart behavior.
-7. Exercise failure handling and documented recovery without changing the published signed assets. Record evidence and remaining Windows 10/missing-WebView2 limitations.
+On **2026-11-11**, the user reported the public v0.1.0 installation/runtime/update-check baseline passed: fresh Setup, no installer UAC/admin prompt, logging and themes, tray and live reminders, online/offline update checking, and hidden login startup with data preserved. The retained fixture is three entries **250, 125, 250 / 625 ml** dated **2026-11-11**, with the recorded final settings and a closed-app `store.json` backup. This is not yet an actual upgrade test or proof of compatibility on the unseen machine.
+
+1. Keep v0.1.0 installed, the dated fixture and backup intact. Do not uninstall, reset data or add test sips before comparison.
+2. Prepare the approved local v0.1.1 version/About-text change, validate and independently review, then obtain separate source-push approval. Inspect Windows CI and its artifact before requesting tag/publication approval.
+3. After separately approved publication, verify all five public downloads, installer signature/authenticated version, metadata and hashes. Do not begin the Windows update test before this gate passes.
+4. On the Windows laptop without the Mac, check for v0.1.1 in About, choose **Download update** and observe progress/verification. Choose **Later**, confirm v0.1.0 and its data remain usable, then return to About and choose **Restart now**.
+5. Confirm About shows **Version 0.1.1** and **“A friendly frog for daily sips and hydration tracking.”** Compare every recorded setting and the same three entries/625 ml. If the local date changed, inspect **2026-11-11** in Week instead of today's Pond total. Recheck tray and login startup.
+6. Exercise download failure/retry and documented recovery safely, preserving the fixture and signed public assets. Record actual outcomes; an offline metadata check alone does not establish failed-download or installer recovery.
+7. At presentation, install on the unseen machine using only the public download and README, then confirm first setup and core operation. Record remaining Windows 10/missing-WebView2 limitations. Phase 7 remains incomplete until the actual upgrade and recovery evidence is recorded; an unseen-machine test cannot be claimed in advance.

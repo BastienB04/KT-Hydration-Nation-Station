@@ -1,6 +1,6 @@
 [package]
 name = "kt-hydration-nation-station"
-version = "0.1.0"
+version = "0.1.1"
 description = "A cartoon-frog hydration reminder for Windows"
 authors = ["BastienB04"]
 edition = "2024"
